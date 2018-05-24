@@ -1,0 +1,9 @@
+Material Player : Common/MatDefs/Light/Lighting.j3md {
+     MaterialParameters {
+        VertexLighting : false
+        UseMaterialColors : true
+        Diffuse : 1.0 0.6 0.0 1.0
+     }
+    AdditionalRenderState {
+    }
+}
