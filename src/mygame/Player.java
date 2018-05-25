@@ -14,6 +14,10 @@ import com.jme3.bullet.collision.shapes.BoxCollisionShape;
 import com.jme3.bullet.collision.shapes.SphereCollisionShape;
 import com.jme3.bullet.control.CharacterControl;
 import com.jme3.bullet.control.RigidBodyControl;
+import com.jme3.input.KeyInput;
+import com.jme3.input.controls.ActionListener;
+import com.jme3.input.controls.AnalogListener;
+import com.jme3.input.controls.KeyTrigger;
 import com.jme3.material.Material;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
@@ -35,7 +39,7 @@ public class Player extends AbstractAppState {
 
     Vector3f position;
     Vector3f walkDirection = new Vector3f();
-    boolean charging = true;
+    boolean charging = false;
     
     public Geometry playerObject;
 
@@ -75,7 +79,15 @@ public class Player extends AbstractAppState {
     
     @Override
     public void update(float tpf) {
-	
+	// Behaviour goes here
+	if (IsCharging()) {
+	    // Debug purposes - add force to player object
+	    player.setGravity(Vector3f.ZERO);
+	    player.setPhysicsLocation(playerObject.getLocalTranslation());
+	} else {
+	    // Debug purposes - add force to player object
+	    player.setGravity(new Vector3f(0, -30f, 0)); 
+	}
     }
 
     public int GetStrength() {
@@ -90,8 +102,31 @@ public class Player extends AbstractAppState {
     public boolean IsCharging() {
         return charging;
     }
+    
+    void InitKeys() {
+	app.getInputManager().addMapping("Charge",  new KeyTrigger(KeyInput.KEY_SPACE));
+	app.getInputManager().addListener(actionListener, "Charge");
+    }
+    
+    private final ActionListener actionListener = new ActionListener() {
+
+	@Override
+	public void onAction(String name, boolean keyPressed, float tpf) {
+	    if (name.equals("Charge")) {
+		charging = true;
+	    }
+	    
+	    if (name.equals("Charge") && !keyPressed) {
+		charging = false;
+	    }
+	    
+	}
+	
+    };
 
     public void Initialize() {
+	InitKeys();
+	
 	// Create geometries for player
         Box box = new Box(1, 1, 1);
         playerObject = new Geometry("PlayerObject", box);
@@ -115,9 +150,6 @@ public class Player extends AbstractAppState {
         
 	// Attach player to root node
         node.attachChild(playerObject);
-        
-        // Debug purposes - add force to plyaer object
-        player.applyCentralForce(new Vector3f(0, 0, 0));
     }
     
 }

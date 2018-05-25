@@ -79,7 +79,7 @@ public class Main extends SimpleApplication {
         rootNode.attachChild(scene);
         
         Spatial arena = rootNode.getChild("Arena");
-        bulletAppState.getPhysicsSpace().add(arena.getControl(RigidBodyControl.class));
+        //bulletAppState.getPhysicsSpace().add(arena.getControl(RigidBodyControl.class));
     }
     
     private void SetupLight() {
