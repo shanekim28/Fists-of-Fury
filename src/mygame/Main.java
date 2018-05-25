@@ -33,7 +33,7 @@ public class Main extends SimpleApplication {
     RigidBodyControl landscape;
     private boolean isRunning = true;
     Player player;
-
+    
     public static void main(String[] args) {
 	Main app = new Main();
 	app.start();
@@ -59,46 +59,6 @@ public class Main extends SimpleApplication {
 	SetupLight();
 	SetupScene();
     }
-    
-    private final ActionListener actionListener = new ActionListener() {
-	@Override
-        public void onAction(String name, boolean keyPressed, float tpf) {
-            if (name.equals("Pause") && !keyPressed) {
-                isRunning = !isRunning;
-            }
-        }
-    };
-    
-    private void SetupScene() {
-	Material mat = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
-	mat.setTexture("DiffuseMap", assetManager.loadTexture("Textures/texture.jpg"));
-	mat.setColor("Diffuse", ColorRGBA.White);
-
-	Geometry sceneModel = (Geometry) assetManager.loadModel("Models/Scene.obj");
-	sceneModel.setMaterial(mat);
-	sceneModel.setLocalTranslation(0, 0, 0);
-        
-        
-        CollisionShape sceneShape = CollisionShapeFactory.createMeshShape(sceneModel);
-        landscape = new RigidBodyControl (sceneShape, 0);
-        sceneModel.addControl(landscape);
-
-	rootNode.attachChild(sceneModel);
-        bulletAppState.getPhysicsSpace().add(landscape);
-    }
-    
-    private void SetupLight() {
-	
-	AmbientLight aL = new AmbientLight();
-	aL.setColor(ColorRGBA.White);
-	rootNode.addLight(aL);
-	
-	DirectionalLight dL = new DirectionalLight();
-	dL.setColor(ColorRGBA.White);
-	dL.setDirection(new Vector3f(2.8f, -2.8f, -2.8f).normalizeLocal());
-	rootNode.addLight(dL);
-    }
-
      
     @Override
     public void simpleUpdate(float tpf) {
@@ -114,6 +74,36 @@ public class Main extends SimpleApplication {
     @Override
     public void simpleRender(RenderManager rm) {
 	//TODO: add render code
+    }
+
+    
+    private final ActionListener actionListener = new ActionListener() {
+	@Override
+        public void onAction(String name, boolean keyPressed, float tpf) {
+            if (name.equals("Pause") && !keyPressed) {
+                isRunning = !isRunning;
+            }
+        }
+    };
+    
+    private void SetupScene() {
+        // Load our scene from the scene composer
+        Spatial scene = assetManager.loadModel("Scenes/Scene.j3o");
+        rootNode.attachChild(scene);
+        
+        Spatial arena = rootNode.getChild("Arena");
+        bulletAppState.getPhysicsSpace().add(arena.getControl(RigidBodyControl.class));
+    }
+    
+    private void SetupLight() {
+	AmbientLight aL = new AmbientLight();
+	aL.setColor(ColorRGBA.White);
+	rootNode.addLight(aL);
+	
+	DirectionalLight dL = new DirectionalLight();
+	dL.setColor(ColorRGBA.White);
+	dL.setDirection(new Vector3f(2.8f, -2.8f, -2.8f).normalizeLocal());
+	rootNode.addLight(dL);
     }
 
     

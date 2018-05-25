@@ -8,6 +8,7 @@ package mygame;
 import com.jme3.app.Application;
 import com.jme3.asset.AssetManager;
 import com.jme3.bullet.BulletAppState;
+import com.jme3.bullet.collision.shapes.BoxCollisionShape;
 import com.jme3.bullet.collision.shapes.SphereCollisionShape;
 import com.jme3.bullet.control.CharacterControl;
 import com.jme3.bullet.control.RigidBodyControl;
@@ -15,6 +16,7 @@ import com.jme3.material.Material;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Sphere;
 
 /**
@@ -39,6 +41,9 @@ public class Player {
     int damagePercent;
     // Add to 15 total
     int speed, defense, strength;
+    
+    PlayerControl playerControl = new PlayerControl();
+
 
     // Default constructor
     public Player(Node _rootNode, AssetManager _assetManager, BulletAppState _appState) {
@@ -73,9 +78,9 @@ public class Player {
 
 
     public void Initialize() {
-        Sphere sphere = new Sphere(32, 32, 2f);
-        playerObject = new Geometry("PlayerObject", sphere);
-        SphereCollisionShape collisionShape = new SphereCollisionShape (2f);
+        Box box = new Box(1, 1, 1);
+        playerObject = new Geometry("PlayerObject", box);
+        BoxCollisionShape collisionShape = new BoxCollisionShape (new Vector3f(1, 1, 1f));
 
         player = new RigidBodyControl(collisionShape, 5);
         player.setGravity(new Vector3f(0, -30f, 0));
@@ -89,9 +94,12 @@ public class Player {
         // Apply rigidbody control to player
         playerObject.addControl(player);
         
+        playerControl.cloneForSpatial(playerObject);
+        
         node.attachChild(playerObject);
         
-        player.applyCentralForce(new Vector3f(0, 2000f, 0));
+        
+        player.applyCentralForce(new Vector3f(0, 0, 0));
     }
     
     public boolean IsCharging() {
