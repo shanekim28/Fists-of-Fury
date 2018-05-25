@@ -17,6 +17,7 @@ import com.jme3.bullet.collision.shapes.SphereCollisionShape;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.CharacterControl;
 import com.jme3.bullet.control.RigidBodyControl;
+import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
@@ -30,10 +31,8 @@ public class Main extends SimpleApplication {
     Spatial scene;
     BulletAppState bulletAppState;
     RigidBodyControl landscape;
-    Vector3f walkDirection = new Vector3f();
-    private boolean left = false, right = false, up = false, down = false;
-    
     private boolean isRunning = true;
+    Player player;
 
     public static void main(String[] args) {
 	Main app = new Main();
@@ -42,13 +41,17 @@ public class Main extends SimpleApplication {
 
     @Override
     public void simpleInitApp() {
-	Player player = new Player();
+        // Setup physics
+        bulletAppState = new BulletAppState();
+        stateManager.attach(bulletAppState);
+        
+        bulletAppState.setDebugEnabled(true);
+        
+        // Create new player, pass in this root node, asset manager, and physics app state
+        player = new Player(this.rootNode, assetManager, bulletAppState);
 	player.Initialize();
 	
 	viewPort.setBackgroundColor(new ColorRGBA(0.7f, 0.8f, 1f, 1f));
-	
-	inputManager.addMapping("Pause",  new KeyTrigger(KeyInput.KEY_P));
-	inputManager.addListener(actionListener, "Pause");
 	
 	flyCam.setEnabled(false);
 	
@@ -71,11 +74,17 @@ public class Main extends SimpleApplication {
 	mat.setTexture("DiffuseMap", assetManager.loadTexture("Textures/texture.jpg"));
 	mat.setColor("Diffuse", ColorRGBA.White);
 
-	Geometry scene = (Geometry) assetManager.loadModel("Models/Scene.obj");
-	scene.setMaterial(mat);
-	scene.setLocalTranslation(0, 0, 0);
+	Geometry sceneModel = (Geometry) assetManager.loadModel("Models/Scene.obj");
+	sceneModel.setMaterial(mat);
+	sceneModel.setLocalTranslation(0, 0, 0);
+        
+        
+        CollisionShape sceneShape = CollisionShapeFactory.createMeshShape(sceneModel);
+        landscape = new RigidBodyControl (sceneShape, 0);
+        sceneModel.addControl(landscape);
 
-	rootNode.attachChild(scene);
+	rootNode.attachChild(sceneModel);
+        bulletAppState.getPhysicsSpace().add(landscape);
     }
     
     private void SetupLight() {
@@ -94,6 +103,12 @@ public class Main extends SimpleApplication {
     @Override
     public void simpleUpdate(float tpf) {
 	//TODO: add update code
+        /*
+        if (player.IsCharging()) {
+            player.player.setPhysicsLocation(player.playerObject.getWorldTranslation());
+            player.player.setGravity(Vector3f.ZERO);
+        }*/
+        
     }
 
     @Override
@@ -101,47 +116,5 @@ public class Main extends SimpleApplication {
 	//TODO: add render code
     }
 
-    public class Player {
-	Vector3f position;
-	Vector3f walkDirection = new Vector3f();
-	
-	int charge;
-	int damagePercent;
-	// 1 to 15
-	int speed, defense, strength;
-	
-	// Default constructor
-	public Player() {
-	    damagePercent = 0;
-	    speed = defense = strength = 5;
-	    position = new Vector3f(0, 0, 0);
-	}
-	
-	public Player(int _speed, int _defense, int _strength) {
-	    damagePercent = 0;
-	    speed = _speed;
-	    defense = _defense;
-	    strength = _strength;
-	}
-	
-	public int GetStrength() {
-	    return strength;
-	}
-	
-	public int GetDefense() {
-	    return defense;
-	}
-	
-	
-	public void Initialize() {
-	    Sphere sphere = new Sphere(32, 32, 2f);
-	    Geometry playerObject = new Geometry("PlayerObject", sphere);
-	    
-	    playerObject.setMaterial((Material) assetManager.loadMaterial("Materials/Player.j3m"));
-	    playerObject.setLocalTranslation(new Vector3f (0, 5, 0));
-	    
-	    rootNode.attachChild(playerObject);
-	}
-	
-    }
+    
 }
