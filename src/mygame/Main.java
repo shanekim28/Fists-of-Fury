@@ -13,11 +13,7 @@ import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.shape.Sphere;
 import com.jme3.math.Vector3f;
-import com.jme3.bullet.collision.shapes.SphereCollisionShape;
-import com.jme3.bullet.collision.shapes.CollisionShape;
-import com.jme3.bullet.control.CharacterControl;
 import com.jme3.bullet.control.RigidBodyControl;
-import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
@@ -48,7 +44,7 @@ public class Main extends SimpleApplication {
         bulletAppState.setDebugEnabled(true);
         
         // Create new player, pass in this root node, asset manager, and physics app state
-        player = new Player(this.rootNode, assetManager, bulletAppState);
+        player = new Player(this);
 	player.Initialize();
 	
 	viewPort.setBackgroundColor(new ColorRGBA(0.7f, 0.8f, 1f, 1f));
@@ -56,6 +52,8 @@ public class Main extends SimpleApplication {
 	flyCam.setEnabled(false);
 	
 	cam.setLocation(new Vector3f(0, 4.5f, 26.5f));
+	
+	stateManager.attach(player);
 	SetupLight();
 	SetupScene();
     }
@@ -63,19 +61,8 @@ public class Main extends SimpleApplication {
     @Override
     public void simpleUpdate(float tpf) {
 	//TODO: add update code
-        /*
-        if (player.IsCharging()) {
-            player.player.setPhysicsLocation(player.playerObject.getWorldTranslation());
-            player.player.setGravity(Vector3f.ZERO);
-        }*/
         
     }
-
-    @Override
-    public void simpleRender(RenderManager rm) {
-	//TODO: add render code
-    }
-
     
     private final ActionListener actionListener = new ActionListener() {
 	@Override
