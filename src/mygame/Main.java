@@ -41,9 +41,9 @@ public class Main extends SimpleApplication {
         bulletAppState = new BulletAppState();
         stateManager.attach(bulletAppState);
         
-        bulletAppState.setDebugEnabled(true);
+        bulletAppState.setDebugEnabled(true); // Debug purposes - draws colliders
         
-        // Create new player, pass in this root node, asset manager, and physics app state
+        // Create new player, passing in this as a SimpleApplication
         player = new Player(this);
 	player.Initialize();
 	
@@ -64,22 +64,14 @@ public class Main extends SimpleApplication {
         
     }
     
-    private final ActionListener actionListener = new ActionListener() {
-	@Override
-        public void onAction(String name, boolean keyPressed, float tpf) {
-            if (name.equals("Pause") && !keyPressed) {
-                isRunning = !isRunning;
-            }
-        }
-    };
-    
     private void SetupScene() {
         // Load our scene from the scene composer
         Spatial scene = assetManager.loadModel("Scenes/Scene.j3o");
         rootNode.attachChild(scene);
         
+	// Finds the object called "Arena" and attaches a RigidBodyControl to it
         Spatial arena = rootNode.getChild("Arena");
-        //bulletAppState.getPhysicsSpace().add(arena.getControl(RigidBodyControl.class));
+        bulletAppState.getPhysicsSpace().add(arena.getControl(RigidBodyControl.class));
     }
     
     private void SetupLight() {

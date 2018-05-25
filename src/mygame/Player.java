@@ -5,7 +5,6 @@
  */
 package mygame;
 
-import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.asset.AssetManager;
@@ -19,6 +18,7 @@ import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.material.Material;
+import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
@@ -34,6 +34,9 @@ public class Player extends AbstractAppState {
     
     AssetManager assetManager;
     BulletAppState bulletAppState;
+    int x = 0, y = 0;
+    
+    Vector2f inputDir = new Vector2f(0, 0);
     
     RigidBodyControl player;
 
@@ -79,13 +82,14 @@ public class Player extends AbstractAppState {
     
     @Override
     public void update(float tpf) {
+	inputDir = new Vector2f(x, y);
+	System.out.println(inputDir.toString());
+	
 	// Behaviour goes here
 	if (IsCharging()) {
-	    // Debug purposes - add force to player object
 	    player.setGravity(Vector3f.ZERO);
 	    player.setPhysicsLocation(playerObject.getLocalTranslation());
 	} else {
-	    // Debug purposes - add force to player object
 	    player.setGravity(new Vector3f(0, -30f, 0)); 
 	}
     }
@@ -105,26 +109,56 @@ public class Player extends AbstractAppState {
     
     void InitKeys() {
 	app.getInputManager().addMapping("Charge",  new KeyTrigger(KeyInput.KEY_SPACE));
-	app.getInputManager().addListener(actionListener, "Charge");
+	app.getInputManager().addMapping("Left", new KeyTrigger(KeyInput.KEY_A));
+	app.getInputManager().addMapping("Right", new KeyTrigger(KeyInput.KEY_D));
+	app.getInputManager().addMapping("Up", new KeyTrigger(KeyInput.KEY_W));
+	app.getInputManager().addMapping("Down", new KeyTrigger(KeyInput.KEY_S));
+
+
+	app.getInputManager().addListener(actionListener, "Charge", "Left", "Right", "Up", "Down");
     }
     
     private final ActionListener actionListener = new ActionListener() {
 
 	@Override
 	public void onAction(String name, boolean keyPressed, float tpf) {
-	    if (name.equals("Charge")) {
+	    if (name.equals("Left") || name.equals("Right") || name.equals("Up") || name.equals("Down")) {
 		charging = true;
+		
+		if (name.equals("Left")) {
+		    x = -1;
+		} else if (name.equals("Right")) {
+		    x = 1;
+		}
+
+		if (name.equals("Left") && !keyPressed) {
+		    x = 0;
+		} else if (name.equals("Right") && !keyPressed) {
+		    x = 0;
+		}
+
+		if (name.equals("Up")) {
+		    y = 1;
+		} else if (name.equals("Down")) {
+		    y = -1;
+		}
+
+		if (name.equals("Up") && !keyPressed) {
+		    y = 0;
+		} else if (name.equals("Down") && !keyPressed) {
+		    y = 0;
+		}
 	    }
 	    
-	    if (name.equals("Charge") && !keyPressed) {
+	    if ((name.equals("Left") || name.equals("Right") || name.equals("Up") || name.equals("Down")) && !keyPressed)
 		charging = false;
-	    }
 	    
 	}
 	
     };
 
     public void Initialize() {
+	// Setup actions for keystrokes
 	InitKeys();
 	
 	// Create geometries for player
