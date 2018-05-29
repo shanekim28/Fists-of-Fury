@@ -18,6 +18,7 @@ import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.material.Material;
+import com.jme3.math.Matrix3f;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
@@ -51,8 +52,6 @@ public class Player extends AbstractAppState {
     // Add to 15 total
     int speed, defense, strength;
     
-    PlayerControl playerControl = new PlayerControl();
-    
     SimpleApplication app;
 
 
@@ -84,7 +83,8 @@ public class Player extends AbstractAppState {
     public void update(float tpf) {
 	inputDir = new Vector2f(x, y);
 	System.out.println(inputDir.toString());
-	
+        //player.setPhysicsRotation(Matrix3f.ZERO);	
+        
 	// Behaviour goes here
 	if (IsCharging()) {
 	    player.setGravity(Vector3f.ZERO);
