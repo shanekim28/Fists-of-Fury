@@ -63,8 +63,6 @@ public class Player extends AbstractAppState implements PhysicsCollisionListener
     // Add to 15 total
     int speed, defense, strength;
     
-    PlayerControl playerControl = new PlayerControl();
-    
     SimpleApplication app;
 
 
