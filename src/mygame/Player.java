@@ -130,8 +130,8 @@ public class Player extends AbstractAppState implements PhysicsCollisionListener
     }
     
     public void TakeDamage(Player enemy) {
-	damagePercent++;
-	player.setMass(player.getMass() / enemy.GetStrength() * GetDefense());
+	damagePercent += enemy.GetStrength();
+	player.setMass(player.getMass() / (enemy.GetStrength() * (15 - GetDefense())));
     }
 
     public int GetStrength() {
