@@ -21,7 +21,7 @@ public class NetworkUtility {
     }
     
     @Serializable
-    public class NetworkMessage extends AbstractMessage {
+    public static class NetworkMessage extends AbstractMessage {
         private String message;
         
         public NetworkMessage() {
