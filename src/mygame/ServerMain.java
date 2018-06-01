@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import mygame.NetworkUtility.AddImpulseToPlayerMessage;
 import mygame.NetworkUtility.NetworkMessage;
 import mygame.NetworkUtility.ReadyMessage;
 import mygame.NetworkUtility.SpawnPlayerWithIDAtLocationMessage;
@@ -28,84 +29,108 @@ import mygame.NetworkUtility.SpawnPlayerWithIDAtLocationMessage;
  * @author shane
  */
 public class ServerMain extends SimpleApplication implements ConnectionListener {
-    int xOffset = 0;
-    static HashMap<Integer, Boolean> playersReady = new HashMap<>();
 
-    private static Server server;
+	boolean started = false;
+	int xOffset = -5;
+	static HashMap<Integer, Boolean> playersReady = new HashMap<>();
 
-    public static void main(String[] args) {
-	ServerMain app = new ServerMain();
-	app.start(JmeContext.Type.Headless);
+	private static Server server;
 
-	NetworkUtility.InitializeSerializables();
+	public static void main(String[] args) {
+		ServerMain app = new ServerMain();
+		app.start(JmeContext.Type.Headless);
 
-    }
-
-    @Override
-    public void simpleInitApp() {
-	try {
-	    server = Network.createServer(NetworkUtility.port);
-	    server.start();
-	} catch (IOException e) {
-	    Logger.getLogger(ServerMain.class.getName()).log(Level.SEVERE, null, e);
+		NetworkUtility.InitializeSerializables();
 	}
-
-	server.addConnectionListener(this);
-	server.addMessageListener(new ServerMessageListener());
-    }
-
-    // <editor-fold defaultstate="collapsed" desc=" Networking ">
-    @Override
-    public void destroy() {
-	server.close();
-	super.destroy();
-    }
-
-    @Override
-    public void connectionAdded(Server server, HostedConnection conn) {
-	System.out.println("---");
-	System.out.println("Server connections: " + server.getConnections().size());
-	System.out.println("Client " + conn.getId() + " has connected. Address: " + conn.getAddress());
-	System.out.println("---");
-
-	server.broadcast(Filters.in(conn), new NetworkMessage("Hello, client"));
-	playersReady.put(conn.getId(), false);
-    }
-
-    @Override
-    public void connectionRemoved(Server server, HostedConnection conn) {
-	System.out.println("Client " + conn.getId() + " has disconnected.");
-	playersReady.remove(conn.getId());
-	System.out.println(playersReady.values());
-
-    }
-
-    private class ServerMessageListener implements MessageListener<HostedConnection> {
 
 	@Override
-	public void messageReceived(HostedConnection source, Message m) {
-	    if (m instanceof NetworkMessage) {
-		System.out.println("Received \"" + ((NetworkMessage) m).getMessage() + "\" from client " + source.getId());
-	    } else if (m instanceof ReadyMessage) {
-		final ReadyMessage message = (ReadyMessage) m;
-		playersReady.put(message.GetID(), message.GetReady());
-		System.out.println(playersReady.values());
-	    }
-
-	    for (boolean b : playersReady.values()) {
-		if (!b) {
-		    return;
+	public void simpleInitApp() {
+		try {
+			server = Network.createServer(NetworkUtility.port);
+			server.start();
+		} catch (IOException e) {
+			Logger.getLogger(ServerMain.class.getName()).log(Level.SEVERE, null, e);
 		}
-	    }
 
-	    // Tell all clients to spawn players with given locations and i as their client ID
-	    for (int i = 0; i < playersReady.size(); i++) {
-		server.broadcast(new SpawnPlayerWithIDAtLocationMessage(new Vector3f(xOffset, 13, 0), i) );
-		xOffset += 3;
-	    }
+		server.addConnectionListener(this);
+		server.addMessageListener(new ServerMessageListener());
+	}
+	
+	@Override
+	public void simpleUpdate(float tpf) {
+		if (started && server.getConnections().isEmpty()) {
+			started = false;
+		}
 	}
 
-    }
+	// <editor-fold defaultstate="collapsed" desc=" Networking ">
+	@Override
+	public void destroy() {
+		server.close();
+		super.destroy();
+	}
+
+	@Override
+	public void connectionAdded(Server server, HostedConnection conn) {
+		System.out.println("---");
+		System.out.println("Server connections: " + server.getConnections().size());
+		
+		for (int i = 0; i < server.getConnections().size(); i++)
+			System.out.println("	" + server.getConnection(i));
+		
+		System.out.println("\nClient " + conn.getId() + " has connected. Address: " + conn.getAddress());
+		System.out.println("---");
+
+		server.broadcast(Filters.in(conn), new NetworkMessage("Hello, client"));
+		playersReady.put(conn.getId(), false);
+		
+	}
+
+	@Override
+	public void connectionRemoved(Server server, HostedConnection conn) {
+		System.out.println("Client " + conn.getId() + " has disconnected.");
+		playersReady.remove(conn.getId());
+		System.out.println(playersReady.values());
+
+	}
+
+	private class ServerMessageListener implements MessageListener<HostedConnection> {
+
+		@Override
+		public void messageReceived(HostedConnection source, Message m) {
+			if (m instanceof NetworkMessage) {
+				System.out.println("Received \"" + ((NetworkMessage) m).getMessage() + "\" from client " + source.getId());
+			} else if (m instanceof ReadyMessage) {
+				final ReadyMessage message = (ReadyMessage) m;
+				playersReady.put(message.GetID(), message.GetReady());
+				System.out.println(playersReady.values());
+			} else if (m instanceof AddImpulseToPlayerMessage) {
+				final AddImpulseToPlayerMessage message = (AddImpulseToPlayerMessage) m;
+
+				server.broadcast(Filters.notIn(source), new AddImpulseToPlayerMessage(message.GetDirection(), message.GetID()));
+			}
+
+			if (!started) {
+				// if message is send impulse message
+				// send message to all clients except the sender to add an impulse with direction and force on specified player ID
+				for (boolean b : playersReady.values()) {
+					if (!b) {
+						return;
+					}
+				}
+
+				// Tell all clients to spawn players with given locations and i as their client ID
+				for (int i = 0; i < playersReady.size(); i++) {
+					server.broadcast(new SpawnPlayerWithIDAtLocationMessage(new Vector3f(xOffset, 13, 0), i));
+					xOffset += 5;
+				}
+				
+				started = true;
+			}
+
+		}
+
+	}
 
 // </editor-fold>
 }

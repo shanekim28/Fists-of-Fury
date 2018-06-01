@@ -22,11 +22,6 @@ public class Main extends SimpleApplication {
     @Override
     public void simpleInitApp() {
 
-        // Create new player, passing in this as a SimpleApplication
-        player = new Player(this);
-        player.Initialize();
-        stateManager.attach(player);
-
         
     }
 
