@@ -5,6 +5,7 @@
  */
 package mygame;
 
+import com.jme3.math.Vector3f;
 import com.jme3.network.AbstractMessage;
 import com.jme3.network.serializing.Serializable;
 import com.jme3.network.serializing.Serializer;
@@ -19,6 +20,7 @@ public class NetworkUtility {
     public static void InitializeSerializables() {
         Serializer.registerClass(NetworkMessage.class);
         Serializer.registerClass(ReadyMessage.class);
+	Serializer.registerClass(SpawnPlayerWithIDAtLocationMessage.class);
     }
     
     @Serializable
@@ -59,5 +61,28 @@ public class NetworkUtility {
         public boolean GetReady() {
             return ready;
         }
+    }
+    
+    @Serializable
+    public static class SpawnPlayerWithIDAtLocationMessage extends AbstractMessage {
+	Vector3f location;
+	int id;
+	
+	public SpawnPlayerWithIDAtLocationMessage() {
+	    
+	}
+	
+	public SpawnPlayerWithIDAtLocationMessage(Vector3f _location, int _id) {
+	    location = _location;
+	    id = _id;
+	}
+	
+	public Vector3f GetLocation() {
+	    return location;
+	}
+	
+	public int GetID() {
+	    return id;
+	}
     }
 }

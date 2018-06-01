@@ -6,6 +6,7 @@
 package mygame;
 
 import com.jme3.app.SimpleApplication;
+import com.jme3.math.Vector3f;
 import com.jme3.network.ConnectionListener;
 import com.jme3.network.Filters;
 import com.jme3.network.HostedConnection;
@@ -20,84 +21,91 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import mygame.NetworkUtility.NetworkMessage;
 import mygame.NetworkUtility.ReadyMessage;
+import mygame.NetworkUtility.SpawnPlayerWithIDAtLocationMessage;
 
 /**
  *
  * @author shane
  */
 public class ServerMain extends SimpleApplication implements ConnectionListener {
-
+    int xOffset = 0;
     static HashMap<Integer, Boolean> playersReady = new HashMap<>();
 
-    private Server server;
+    private static Server server;
 
     public static void main(String[] args) {
-        ServerMain app = new ServerMain();
-        app.start(JmeContext.Type.Headless);
+	ServerMain app = new ServerMain();
+	app.start(JmeContext.Type.Headless);
 
-        NetworkUtility.InitializeSerializables();
+	NetworkUtility.InitializeSerializables();
 
     }
 
     @Override
     public void simpleInitApp() {
-        try {
-            server = Network.createServer(NetworkUtility.port);
-            server.start();
-        } catch (IOException e) {
-            Logger.getLogger(ServerMain.class.getName()).log(Level.SEVERE, null, e);
-        }
+	try {
+	    server = Network.createServer(NetworkUtility.port);
+	    server.start();
+	} catch (IOException e) {
+	    Logger.getLogger(ServerMain.class.getName()).log(Level.SEVERE, null, e);
+	}
 
-        server.addConnectionListener(this);
-        server.addMessageListener(new ServerMessageListener());
+	server.addConnectionListener(this);
+	server.addMessageListener(new ServerMessageListener());
     }
 
     // <editor-fold defaultstate="collapsed" desc=" Networking ">
     @Override
     public void destroy() {
-        server.close();
-        super.destroy();
+	server.close();
+	super.destroy();
     }
-    
+
     @Override
     public void connectionAdded(Server server, HostedConnection conn) {
-        System.out.println("---");
-        System.out.println("Server connections: " + server.getConnections().size());
-        System.out.println("Client " + conn.getId() + " has connected. Address: " + conn.getAddress());
-        System.out.println("---");
-        
-        server.broadcast(Filters.in(conn), new NetworkMessage("Hello, client"));
-        playersReady.put(conn.getId(), false);
+	System.out.println("---");
+	System.out.println("Server connections: " + server.getConnections().size());
+	System.out.println("Client " + conn.getId() + " has connected. Address: " + conn.getAddress());
+	System.out.println("---");
+
+	server.broadcast(Filters.in(conn), new NetworkMessage("Hello, client"));
+	playersReady.put(conn.getId(), false);
     }
-    
+
     @Override
     public void connectionRemoved(Server server, HostedConnection conn) {
-        System.out.println("Client " + conn.getId() + " has disconnected.");
-        playersReady.remove(conn.getId());
-        System.out.println(playersReady.values());
-        
+	System.out.println("Client " + conn.getId() + " has disconnected.");
+	playersReady.remove(conn.getId());
+	System.out.println(playersReady.values());
+
     }
-    
-    private static class ServerMessageListener implements MessageListener<HostedConnection> {
-        
-        @Override
-        public void messageReceived(HostedConnection source, Message m) {
-            if (m instanceof NetworkMessage) {
-                System.out.println("Received \"" + ((NetworkMessage) m).getMessage() + "\" from client " + source.getId());
-            } else if (m instanceof ReadyMessage) {
-                final ReadyMessage message = (ReadyMessage) m;
-                playersReady.put(message.GetID(), message.GetReady());
-                System.out.println(playersReady.values());
-            }
-            
-            for (boolean b : playersReady.values()) {
-                if (!b)
-                    return;
-            }
-        }
-        
+
+    private class ServerMessageListener implements MessageListener<HostedConnection> {
+
+	@Override
+	public void messageReceived(HostedConnection source, Message m) {
+	    if (m instanceof NetworkMessage) {
+		System.out.println("Received \"" + ((NetworkMessage) m).getMessage() + "\" from client " + source.getId());
+	    } else if (m instanceof ReadyMessage) {
+		final ReadyMessage message = (ReadyMessage) m;
+		playersReady.put(message.GetID(), message.GetReady());
+		System.out.println(playersReady.values());
+	    }
+
+	    for (boolean b : playersReady.values()) {
+		if (!b) {
+		    return;
+		}
+	    }
+
+	    // Tell all clients to spawn players with given locations and i as their client ID
+	    for (int i = 0; i < playersReady.size(); i++) {
+		server.broadcast(new SpawnPlayerWithIDAtLocationMessage(new Vector3f(xOffset, 13, 0), i) );
+		xOffset += 3;
+	    }
+	}
+
     }
 
 // </editor-fold>
-
 }

@@ -6,22 +6,27 @@
 package mygame;
 
 import com.jme3.app.SimpleApplication;
+import com.jme3.math.Vector3f;
 import com.jme3.network.Client;
 import com.jme3.network.ClientStateListener;
 import com.jme3.network.Message;
 import com.jme3.network.MessageListener;
 import com.jme3.network.Network;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import mygame.NetworkUtility.NetworkMessage;
 import mygame.NetworkUtility.ReadyMessage;
+import mygame.NetworkUtility.SpawnPlayerWithIDAtLocationMessage;
 
 /**
  *
  * @author shane
  */
 public class ClientMain extends SimpleApplication implements ClientStateListener {
+    ArrayList<Player> players = new ArrayList<>();
 
     LobbyState lobbyState;
 
@@ -67,10 +72,16 @@ public class ClientMain extends SimpleApplication implements ClientStateListener
     public void SetReady(boolean ready) {
         isReady = ready;
     }
+    
+    public void SpawnPlayer(Vector3f location, int id) {
+	Player p = new Player(this, client, id);
+	p.Initialize();
+	stateManager.attach(p);
+	players.add(p);
+    }
 
-// <editor-fold defaultstate="collapsed" desc=" Networking ">
+    // <editor-fold defaultstate="collapsed" desc=" Networking ">
     @Override
-
     public void destroy() {
         client.close();
         super.destroy();
@@ -86,13 +97,24 @@ public class ClientMain extends SimpleApplication implements ClientStateListener
         
     }
 
-    private static class ClientMessageListener implements MessageListener<Client> {
+    private class ClientMessageListener implements MessageListener<Client> {
 
         @Override
         public void messageReceived(Client source, Message m) {
             if (m instanceof NetworkMessage) {
                 client.send(new NetworkMessage("Hello, server"));
-            }
+            } else if (m instanceof SpawnPlayerWithIDAtLocationMessage) {
+		final SpawnPlayerWithIDAtLocationMessage message = (SpawnPlayerWithIDAtLocationMessage) m;
+		
+		ClientMain.this.enqueue(new Callable() {
+		    @Override
+		    public Object call() throws Exception {
+			SpawnPlayer(message.GetLocation(), message.GetID());
+			return null;
+		    }
+		    
+		});
+	    }
         }
 
     }
