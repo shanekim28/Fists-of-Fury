@@ -15,20 +15,33 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import mygame.NetworkUtility.NetworkMessage;
+import mygame.NetworkUtility.ReadyMessage;
 
 /**
  *
  * @author shane
  */
 public class ClientMain extends SimpleApplication implements ClientStateListener {
-    
+
+    LobbyState lobbyState;
+
     private static Client client;
-    
+    private boolean isReady = false;
+
     public static void main(String[] args) {
-        ClientMain app  = new ClientMain();
+        ClientMain app = new ClientMain();
         app.start();
-        
+
         NetworkUtility.InitializeSerializables();
+    }
+
+    @Override
+    public void simpleUpdate(float tpf) {
+        if (isReady && stateManager.hasState(lobbyState)) {
+            stateManager.detach(lobbyState);
+            client.send(new NetworkMessage("Client " + client.getId() + " is ready!"));
+            client.send(new ReadyMessage(client.getId(), true));
+        }
     }
 
     @Override
@@ -39,35 +52,50 @@ public class ClientMain extends SimpleApplication implements ClientStateListener
         } catch (IOException e) {
             Logger.getLogger(ClientMain.class.getName()).log(Level.SEVERE, null, e);
         }
-        
+
         client.addClientStateListener(this);
         client.addMessageListener(new ClientMessageListener());
+
+        new CreateScene(this).Initialize();
+
+        lobbyState = new LobbyState(client, this);
+        lobbyState.Init();
+        stateManager.attach(lobbyState);
+
     }
-    
+
+    public void SetReady(boolean ready) {
+        isReady = ready;
+    }
+
+// <editor-fold defaultstate="collapsed" desc=" Networking ">
     @Override
-    public void destroy () {
+
+    public void destroy() {
         client.close();
         super.destroy();
     }
 
     @Override
     public void clientConnected(Client c) {
+
     }
 
     @Override
     public void clientDisconnected(Client c, DisconnectInfo info) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
     }
-    
+
     private static class ClientMessageListener implements MessageListener<Client> {
 
         @Override
         public void messageReceived(Client source, Message m) {
             if (m instanceof NetworkMessage) {
-                client.send(new NetworkUtility.NetworkMessage("Hello, server"));
+                client.send(new NetworkMessage("Hello, server"));
             }
         }
-        
+
     }
-    
+
+// </editor-fold>
 }

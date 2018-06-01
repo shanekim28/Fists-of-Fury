@@ -18,6 +18,7 @@ public class NetworkUtility {
     
     public static void InitializeSerializables() {
         Serializer.registerClass(NetworkMessage.class);
+        Serializer.registerClass(ReadyMessage.class);
     }
     
     @Serializable
@@ -34,6 +35,29 @@ public class NetworkUtility {
         
         public String getMessage() {
             return message;
+        }
+    }
+    
+    @Serializable
+    public static class ReadyMessage extends AbstractMessage {
+        private int id;
+        private boolean ready;
+        
+        public ReadyMessage() {
+            
+        }
+        
+        public ReadyMessage (int _id, boolean _ready) {
+            id = _id;
+            ready = _ready;
+        }
+        
+        public int GetID() {
+            return id;
+        }
+        
+        public boolean GetReady() {
+            return ready;
         }
     }
 }
