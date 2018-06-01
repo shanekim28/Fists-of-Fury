@@ -38,6 +38,8 @@ import com.jme3.bullet.collision.PhysicsCollisionListener;
 public class Player extends AbstractAppState implements PhysicsCollisionListener {
     Node node;
     
+    int clientId;
+    
     AssetManager assetManager;
     BulletAppState bulletAppState;
     int x = 0, y = 0;
@@ -53,6 +55,8 @@ public class Player extends AbstractAppState implements PhysicsCollisionListener
     
     int boundary = 75;
     
+    Vector3f spawnPoint;
+    
     int jumpCharges = 2;
     
     public Geometry playerObject;
@@ -67,12 +71,14 @@ public class Player extends AbstractAppState implements PhysicsCollisionListener
 
 
     // Default constructor
-    public Player(SimpleApplication _app) {
+    public Player(SimpleApplication _app, Vector3f _spawnPoint, int _clientId) {
 	app = _app;
+	clientId = _clientId;
         node = 	app.getRootNode();
         assetManager = 	app.getAssetManager();
         bulletAppState = app.getStateManager().getState(BulletAppState.class);
-        
+        spawnPoint = _spawnPoint;
+	
         damagePercent = 0;
         speed = defense = strength = 5;
         position = new Vector3f(0, 0, 0);
@@ -94,6 +100,7 @@ public class Player extends AbstractAppState implements PhysicsCollisionListener
 	return position;
     }
     
+    
     @Override
     public void update(float tpf) {
 	inputDir.x = x;
@@ -108,8 +115,13 @@ public class Player extends AbstractAppState implements PhysicsCollisionListener
 	}
 	
 	// If anchored, slow down the player
-	if (IsAnchored())
+	if (IsAnchored()) {
 	    player.setLinearVelocity(player.getLinearVelocity().multLocal(0.995f, 0.995f, 0.995f));
+	    player.setGravity(new Vector3f(0, -5, 0));
+	} else {
+	    player.setGravity(new Vector3f(0, -30, 0));
+	}
+	
 	// Kill the player if it goes out of bounds
 	if ((player.getPhysicsLocation().x > boundary || player.getPhysicsLocation().y > boundary * 2 || player.getPhysicsLocation().z > boundary) || (player.getPhysicsLocation().x < -boundary || player.getPhysicsLocation().y < -boundary || player.getPhysicsLocation().z < -boundary))
 	    Die();
@@ -162,8 +174,6 @@ public class Player extends AbstractAppState implements PhysicsCollisionListener
 	
 	
 	app.getInputManager().addListener(actionListener, "Anchor", "Left", "Right", "Up", "Down");
-	
-	
     }
     
     private final ActionListener actionListener = new ActionListener() {
@@ -237,13 +247,14 @@ public class Player extends AbstractAppState implements PhysicsCollisionListener
         bulletAppState.getPhysicsSpace().add(player);
 
         playerObject.setMaterial((Material) assetManager.loadMaterial("Materials/Player.j3m"));
-        playerObject.setLocalTranslation(new Vector3f (0, 13, 0));
+        playerObject.setLocalTranslation(spawnPoint);
         
         // Apply rigidbody control to player
         playerObject.addControl(player);
         
         // playerControl.cloneForSpatial(playerObject);
-        
+        playerObject.setName("Player " + clientId);
+	
 	// Attach player to root node
         node.attachChild(playerObject);
     }

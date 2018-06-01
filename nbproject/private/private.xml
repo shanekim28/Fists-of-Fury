@@ -3,7 +3,10 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/D:/JMonkey%20Projects/Fists-of-Fury/src/mygame/PlayerControl.java</file>
+            <file>file:/C:/Users/shane/Documents/HelloWorld/src/mygame/Player.java</file>
+            <file>file:/C:/Users/shane/Documents/HelloWorld/src/mygame/ClientMain.java</file>
+            <file>file:/C:/Users/shane/Documents/HelloWorld/src/mygame/NetworkUtility.java</file>
+            <file>file:/C:/Users/shane/Documents/HelloWorld/src/mygame/ServerMain.java</file>
         </group>
     </open-files>
 </project-private>
