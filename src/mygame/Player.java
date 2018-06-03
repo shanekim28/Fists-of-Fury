@@ -24,6 +24,7 @@ import com.jme3.scene.shape.Box;
 import com.jme3.bullet.collision.PhysicsCollisionListener;
 import com.jme3.network.Client;
 import mygame.NetworkUtility.AddImpulseToPlayerMessage;
+import mygame.NetworkUtility.UpdatePlayerLocationMessage;
 
 /**
  *
@@ -31,238 +32,240 @@ import mygame.NetworkUtility.AddImpulseToPlayerMessage;
  */
 public class Player extends AbstractAppState implements PhysicsCollisionListener {
 
-	Node node;
+    Node node;
 
-	AssetManager assetManager;
-	BulletAppState bulletAppState;
-	int x = 0, y = 0;
+    AssetManager assetManager;
+    BulletAppState bulletAppState;
+    int x = 0, y = 0;
 
-	Vector2f inputDir = new Vector2f(0, 0);
+    Vector2f inputDir = new Vector2f(0, 0);
 
-	RigidBodyControl rb;
+    RigidBodyControl rb;
 
-	Vector3f position;
-	Vector3f walkDirection = new Vector3f();
-	boolean charging = false;
-	boolean anchored = false;
+    Vector3f position;
+    Vector3f walkDirection = new Vector3f();
+    boolean charging = false;
+    boolean anchored = false;
 
-	int boundary = 75;
+    int boundary = 75;
 
-	int jumpCharges = 2;
+    int jumpCharges = 2;
 
-	public Geometry playerObject;
+    public Geometry playerObject;
 
-	float charge;
-	int damagePercent;
-	int lives = 3;
-	// Add to 15 total
-	int speed, defense, strength;
+    float charge;
+    int damagePercent;
+    int lives = 3;
+    // Add to 15 total
+    int speed, defense, strength;
 
-	SimpleApplication app;
-	Client client;
-	int clientId;
+    SimpleApplication app;
+    Client client;
+    int clientId;
 
-	// Default constructor
-	public Player(SimpleApplication _app, Client _client, int _id) {
-		app = _app;
-		client = _client;
-		clientId = _id;
+    // Default constructor
+    public Player(SimpleApplication _app, Client _client, int _id) {
+        app = _app;
+        client = _client;
+        clientId = _id;
 
-		node = app.getRootNode();
-		assetManager = app.getAssetManager();
-		bulletAppState = app.getStateManager().getState(BulletAppState.class);
+        node = app.getRootNode();
+        assetManager = app.getAssetManager();
+        bulletAppState = app.getStateManager().getState(BulletAppState.class);
 
-		damagePercent = 0;
-		speed = defense = strength = 5;
-		position = new Vector3f(0, 0, 0);
-	}
+        damagePercent = 0;
+        speed = defense = strength = 5;
+        position = new Vector3f(0, 0, 0);
+    }
 
-	public Player(SimpleApplication _app, int _speed, int _defense, int _strength) {
-		app = _app;
-		node = app.getRootNode();
-		assetManager = app.getAssetManager();
-		bulletAppState = app.getStateManager().getState(BulletAppState.class);
+    public Player(SimpleApplication _app, int _speed, int _defense, int _strength) {
+        app = _app;
+        node = app.getRootNode();
+        assetManager = app.getAssetManager();
+        bulletAppState = app.getStateManager().getState(BulletAppState.class);
 
-		damagePercent = 0;
-		speed = _speed;
-		defense = _defense;
-		strength = _strength;
-	}
+        damagePercent = 0;
+        speed = _speed;
+        defense = _defense;
+        strength = _strength;
+    }
 
-	public Vector3f getPosition() {
-		return position;
-	}
+    public Vector3f getPosition() {
+        return position;
+    }
 
-	@Override
-	public void update(float tpf) {
-		// TODO - Make this not stupid
-		// Restrict motion to the x and y axis
-		rb.setLinearVelocity(rb.getLinearVelocity().multLocal(1, 1, 0));
+    @Override
+    public void update(float tpf) {
+        // TODO - Make this not stupid
+        // Restrict motion to the x and y axis
+        rb.setLinearVelocity(rb.getLinearVelocity().multLocal(1, 1, 0));
+        
 
-		// Kill the player if it goes out of bounds
-		if ((rb.getPhysicsLocation().x > boundary || rb.getPhysicsLocation().y > boundary * 2 || rb.getPhysicsLocation().z > boundary) || (rb.getPhysicsLocation().x < -boundary || rb.getPhysicsLocation().y < -boundary || rb.getPhysicsLocation().z < -boundary)) {
-			Die();
-		}
+        // Kill the player if it goes out of bounds
+        if ((rb.getPhysicsLocation().x > boundary || rb.getPhysicsLocation().y > boundary * 2 || rb.getPhysicsLocation().z > boundary) || (rb.getPhysicsLocation().x < -boundary || rb.getPhysicsLocation().y < -boundary || rb.getPhysicsLocation().z < -boundary)) {
+            Die();
+        }
 
-		// Check against current client's ID against constructed ID
-		if (client.getId() != clientId) {
-			return;
-		}
+        // Check against current client's ID against constructed ID
+        if (client.getId() != clientId) {
+            return;
+        }
+        
+        client.send(new UpdatePlayerLocationMessage(rb.getPhysicsLocation(), rb.getPhysicsRotation(), clientId));
 
-		inputDir.x = x;
-		inputDir.y = y;
-		System.out.println(inputDir.toString() + " " + charge);
+        inputDir.x = x;
+        inputDir.y = y;
+        System.out.println(inputDir.toString() + " " + charge);
 
-		// Behaviour goes here
-		if (IsCharging()) {
-			// Increment the charge until it reaches a limit
-			if (charge < 20) {
-				charge += ((float) speed / 100);
-			}
-		}
+        // Behaviour goes here
+        if (IsCharging()) {
+            // Increment the charge until it reaches a limit
+            if (charge < 20) {
+                charge += ((float) speed / 100);
+            }
+        }
 
-		// If anchored, slow down the player
-		if (IsAnchored()) {
-			rb.setLinearVelocity(rb.getLinearVelocity().multLocal(0.995f, 0.995f, 0.995f));
-		}
+        // If anchored, slow down the player
+        if (IsAnchored()) {
+            rb.setLinearVelocity(rb.getLinearVelocity().multLocal(0.995f, 0.995f, 0.995f));
+        }
 
-	}
+    }
 
-	public void Die() {
-		if (lives > 0) {
-			// Reduce life count
-			lives--;
-			// Reset the player
-			rb.setLinearVelocity(new Vector3f(0, -10, 0));
-			rb.setPhysicsLocation(new Vector3f(0, 20, 0));
-		}
-	}
+    public void Die() {
+        if (lives > 0) {
+            // Reduce life count
+            lives--;
+            // Reset the player
+            rb.setLinearVelocity(new Vector3f(0, -10, 0));
+            rb.setPhysicsLocation(new Vector3f(0, 20, 0));
+        }
+    }
 
-	public void TakeDamage(Player enemy) {
-		damagePercent += enemy.GetStrength();
-		rb.setMass(rb.getMass() / (enemy.GetStrength() * (15 - GetDefense())));
-	}
+    public void TakeDamage(Player enemy) {
+        damagePercent += enemy.GetStrength();
+        rb.setMass(rb.getMass() / (enemy.GetStrength() * (15 - GetDefense())));
+    }
 
-	public int GetStrength() {
-		return strength;
-	}
+    public int GetStrength() {
+        return strength;
+    }
 
-	public int GetDefense() {
-		return defense;
-	}
+    public int GetDefense() {
+        return defense;
+    }
 
-	public boolean IsCharging() {
-		return charging;
-	}
+    public boolean IsCharging() {
+        return charging;
+    }
 
-	public boolean IsAnchored() {
-		return anchored;
-	}
-	
-	public RigidBodyControl GetRigidBodyControl() {
-		return rb;
-	}
+    public boolean IsAnchored() {
+        return anchored;
+    }
 
-	void InitKeys() {
-		// Set up the key listeners
+    public RigidBodyControl GetRigidBodyControl() {
+        return rb;
+    }
 
-		app.getInputManager().addMapping("Anchor", new KeyTrigger(KeyInput.KEY_SPACE));
-		app.getInputManager().addMapping("Left", new KeyTrigger(KeyInput.KEY_A));
-		app.getInputManager().addMapping("Right", new KeyTrigger(KeyInput.KEY_D));
-		app.getInputManager().addMapping("Up", new KeyTrigger(KeyInput.KEY_W));
-		app.getInputManager().addMapping("Down", new KeyTrigger(KeyInput.KEY_S));
+    void InitKeys() {
+        // Set up the key listeners
+        app.getInputManager().addMapping("Anchor", new KeyTrigger(KeyInput.KEY_SPACE));
+        app.getInputManager().addMapping("Left", new KeyTrigger(KeyInput.KEY_A));
+        app.getInputManager().addMapping("Right", new KeyTrigger(KeyInput.KEY_D));
+        app.getInputManager().addMapping("Up", new KeyTrigger(KeyInput.KEY_W));
+        app.getInputManager().addMapping("Down", new KeyTrigger(KeyInput.KEY_S));
 
-		app.getInputManager().addListener(actionListener, "Anchor", "Left", "Right", "Up", "Down");
+        app.getInputManager().addListener(actionListener, "Anchor", "Left", "Right", "Up", "Down");
 
-	}
+    }
 
-	private final ActionListener actionListener = new ActionListener() {
+    private final ActionListener actionListener = new ActionListener() {
 
-		@Override
-		public void onAction(String name, boolean keyPressed, float tpf) {
-			if (name.equals("Left") || name.equals("Right") || name.equals("Up") || name.equals("Down")) {
-				charging = true;
+        @Override
+        public void onAction(String name, boolean keyPressed, float tpf) {
+            if (name.equals("Left") || name.equals("Right") || name.equals("Up") || name.equals("Down")) {
+                charging = true;
 
-				if (name.equals("Left")) {
-					x = -1;
-				} else if (name.equals("Right")) {
-					x = 1;
-				}
+                if (name.equals("Left")) {
+                    x = -1;
+                } else if (name.equals("Right")) {
+                    x = 1;
+                }
 
-				if (name.equals("Up")) {
-					y = 1;
-				} else if (name.equals("Down")) {
-					y = -1;
-				}
-			}
+                if (name.equals("Up")) {
+                    y = 1;
+                } else if (name.equals("Down")) {
+                    y = -1;
+                }
+            }
 
-			if ((name.equals("Left") || name.equals("Right") || name.equals("Up") || name.equals("Down")) && !keyPressed) {
-				if (jumpCharges > 0) {
-					float force = strength * charge;
-					Vector3f dir = new Vector3f (inputDir.x, inputDir.y, 0).mult(strength * charge);
-					
-					rb.applyImpulse(dir, Vector3f.ZERO);
-					client.send(new AddImpulseToPlayerMessage(dir, client.getId()));
-					//jumpCharges--;
-				}
+            if ((name.equals("Left") || name.equals("Right") || name.equals("Up") || name.equals("Down")) && !keyPressed) {
+                if (jumpCharges > 0) {
+                    float force = strength * charge;
+                    Vector3f dir = new Vector3f(inputDir.x, inputDir.y, 0).mult(strength * charge);
 
-				charging = false;
-				charge = 0;
+                    rb.applyImpulse(dir, Vector3f.ZERO);
+                    client.send(new AddImpulseToPlayerMessage(dir, client.getId()));
+                    //jumpCharges--;
+                }
 
-				if (name.equals("Up")) {
-					y = 0;
-				} else if (name.equals("Down")) {
-					y = 0;
-				}
+                charging = false;
+                charge = 0;
 
-				if (name.equals("Left")) {
-					x = 0;
-				} else if (name.equals("Right")) {
-					x = 0;
-				}
-			}
+                if (name.equals("Up")) {
+                    y = 0;
+                } else if (name.equals("Down")) {
+                    y = 0;
+                }
 
-			if (name.equals("Anchor")) {
-				anchored = true;
-			}
+                if (name.equals("Left")) {
+                    x = 0;
+                } else if (name.equals("Right")) {
+                    x = 0;
+                }
+            }
 
-			if (name.equals("Anchor") && !keyPressed) {
-				anchored = false;
-			}
-		}
+            if (name.equals("Anchor")) {
+                anchored = true;
+            }
 
-	};
+            if (name.equals("Anchor") && !keyPressed) {
+                anchored = false;
+            }
+        }
 
-	public void Initialize() {
-		// Setup actions for keystrokes
-		InitKeys();
+    };
 
-		// Create geometries for player
-		Box box = new Box(1, 1, 1);
-		playerObject = new Geometry("PlayerObject", box);
-		BoxCollisionShape collisionShape = new BoxCollisionShape(new Vector3f(1, 1, 1f));
+    public void Initialize() {
+        // Setup actions for keystrokes
+        InitKeys();
 
-		// Create new RigidBodyControl for player
-		rb = new RigidBodyControl(collisionShape, strength);
-		rb.setGravity(new Vector3f(0, -30f, 0));
-		rb.setPhysicsLocation(new Vector3f(0, 13, 0));
+        // Create geometries for player
+        Box box = new Box(1, 1, 1);
+        playerObject = new Geometry("PlayerObject", box);
+        BoxCollisionShape collisionShape = new BoxCollisionShape(new Vector3f(1, 1, 1f));
 
-		// Add the player RigidBodyControl to the application's bullet app state
-		bulletAppState.getPhysicsSpace().add(rb);
+        // Create new RigidBodyControl for player
+        rb = new RigidBodyControl(collisionShape, strength);
+        rb.setGravity(new Vector3f(0, -30f, 0));
+        rb.setPhysicsLocation(new Vector3f(0, 13, 0));
 
-		playerObject.setMaterial((Material) assetManager.loadMaterial("Materials/Player.j3m"));
-		playerObject.setLocalTranslation(new Vector3f(0, 13, 0));
+        // Add the player RigidBodyControl to the application's bullet app state
+        bulletAppState.getPhysicsSpace().add(rb);
 
-		// Apply rigidbody control to player
-		playerObject.addControl(rb);
+        playerObject.setMaterial((Material) assetManager.loadMaterial("Materials/Player.j3m"));
+        playerObject.setLocalTranslation(new Vector3f(0, 13, 0));
 
-		// playerControl.cloneForSpatial(playerObject);
-		// Attach player to root node
-		node.attachChild(playerObject);
-	}
+        // Apply rigidbody control to player
+        playerObject.addControl(rb);
 
-	@Override
-	public void collision(PhysicsCollisionEvent event) {
-		jumpCharges = 2;
-	}
+        // playerControl.cloneForSpatial(playerObject);
+        // Attach player to root node
+        node.attachChild(playerObject);
+    }
+
+    @Override
+    public void collision(PhysicsCollisionEvent event) {
+        jumpCharges = 2;
+    }
 }

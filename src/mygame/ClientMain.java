@@ -21,6 +21,7 @@ import mygame.NetworkUtility.AddImpulseToPlayerMessage;
 import mygame.NetworkUtility.NetworkMessage;
 import mygame.NetworkUtility.ReadyMessage;
 import mygame.NetworkUtility.SpawnPlayerWithIDAtLocationMessage;
+import mygame.NetworkUtility.UpdatePlayerLocationMessage;
 
 /**
  *
@@ -28,104 +29,121 @@ import mygame.NetworkUtility.SpawnPlayerWithIDAtLocationMessage;
  */
 public class ClientMain extends SimpleApplication implements ClientStateListener {
 
-	ArrayList<Player> players = new ArrayList<>();
+    ArrayList<Player> players = new ArrayList<>();
 
-	LobbyState lobbyState;
+    LobbyState lobbyState;
 
-	private static Client client;
-	private boolean isReady = false;
+    private static Client client;
+    private boolean isReady = false;
 
-	public static void main(String[] args) {
-		ClientMain app = new ClientMain();
-		app.start();
+    public static void main(String[] args) {
+        ClientMain app = new ClientMain();
+        app.start();
 
-		NetworkUtility.InitializeSerializables();
-		
-		app.setPauseOnLostFocus(false);
-	}
+        NetworkUtility.InitializeSerializables();
 
-	@Override
-	public void simpleUpdate(float tpf) {
-		if (isReady && stateManager.hasState(lobbyState)) {
-			stateManager.detach(lobbyState);
-			client.send(new NetworkMessage("Client " + client.getId() + " is ready!"));
-			client.send(new ReadyMessage(client.getId(), true));
-		}
-	}
+        app.setPauseOnLostFocus(false);
+    }
 
-	@Override
-	public void simpleInitApp() {
-		try {
-			client = Network.connectToServer("localhost", NetworkUtility.port);
-			client.start();
-		} catch (IOException e) {
-			Logger.getLogger(ClientMain.class.getName()).log(Level.SEVERE, null, e);
-		}
+    @Override
+    public void simpleUpdate(float tpf) {
+        if (isReady && stateManager.hasState(lobbyState)) {
+            stateManager.detach(lobbyState);
+            client.send(new NetworkMessage("Client " + client.getId() + " is ready!"));
+            client.send(new ReadyMessage(client.getId(), true));
+        }
+    }
 
-		client.addClientStateListener(this);
-		client.addMessageListener(new ClientMessageListener());
+    @Override
+    public void simpleInitApp() {
+        try {
+            client = Network.connectToServer("localhost", NetworkUtility.port);
+            client.start();
+        } catch (IOException e) {
+            Logger.getLogger(ClientMain.class.getName()).log(Level.SEVERE, null, e);
+        }
 
-		new CreateScene(this).Initialize();
+        client.addClientStateListener(this);
+        client.addMessageListener(new ClientMessageListener());
 
-		lobbyState = new LobbyState(client, this);
-		lobbyState.Init();
-		stateManager.attach(lobbyState);
+        new CreateScene(this).Initialize();
 
-	}
+        lobbyState = new LobbyState(client, this);
+        lobbyState.Init();
+        stateManager.attach(lobbyState);
 
-	public void SetReady(boolean ready) {
-		isReady = ready;
-	}
+    }
 
-	public void SpawnPlayer(Vector3f location, int id) {
-		Player p = new Player(this, client, id);
-		p.Initialize();
-		stateManager.attach(p);
-		players.add(p);
-	}
+    public void SetReady(boolean ready) {
+        isReady = ready;
+    }
 
-	// <editor-fold defaultstate="collapsed" desc=" Networking ">
-	@Override
-	public void destroy() {
-		client.close();
-		super.destroy();
-	}
+    public void SpawnPlayer(Vector3f location, int id) {
+        Player p = new Player(this, client, id);
+        p.Initialize();
+        stateManager.attach(p);
+        players.add(p);
+    }
 
-	@Override
-	public void clientConnected(Client c) {
+    // <editor-fold defaultstate="collapsed" desc=" Networking ">
+    @Override
+    public void destroy() {
+        client.close();
+        super.destroy();
+    }
 
-	}
+    @Override
+    public void clientConnected(Client c) {
 
-	@Override
-	public void clientDisconnected(Client c, DisconnectInfo info) {
+    }
 
-	}
+    @Override
+    public void clientDisconnected(Client c, DisconnectInfo info) {
 
-	private class ClientMessageListener implements MessageListener<Client> {
+    }
 
-		@Override
-		public void messageReceived(Client source, Message m) {
-			if (m instanceof NetworkMessage) {
-				client.send(new NetworkMessage("Hello, server"));
-			} else if (m instanceof SpawnPlayerWithIDAtLocationMessage) {
-				final SpawnPlayerWithIDAtLocationMessage message = (SpawnPlayerWithIDAtLocationMessage) m;
+    private class ClientMessageListener implements MessageListener<Client> {
 
-				ClientMain.this.enqueue(new Callable() {
-					@Override
-					public Object call() throws Exception {
-						SpawnPlayer(message.GetLocation(), message.GetID());
-						return null;
-					}
+        @Override
+        public void messageReceived(Client source, Message m) {
+            if (m instanceof NetworkMessage) {
+                client.send(new NetworkMessage("Hello, server"));
+            } else if (m instanceof SpawnPlayerWithIDAtLocationMessage) {
+                final SpawnPlayerWithIDAtLocationMessage message = (SpawnPlayerWithIDAtLocationMessage) m;
 
-				});
-			} else if (m instanceof AddImpulseToPlayerMessage) {
-				final AddImpulseToPlayerMessage message = (AddImpulseToPlayerMessage) m;
-				
-				players.get(message.GetID()).GetRigidBodyControl().applyImpulse(message.GetDirection(), Vector3f.ZERO);
-			}
+                ClientMain.this.enqueue(new Callable() {
+                    @Override
+                    public Object call() throws Exception {
+                        SpawnPlayer(message.GetLocation(), message.GetID());
+                        return null;
+                    }
 
-		}
-	}
+                });
+            }
+
+            if (m instanceof UpdatePlayerLocationMessage) {
+                final UpdatePlayerLocationMessage message = (UpdatePlayerLocationMessage) m;
+
+                ClientMain.this.enqueue(new Callable() {
+                    @Override
+                    public Object call() throws Exception {
+                        players.get(message.GetID()).GetRigidBodyControl().setPhysicsLocation(message.GetLocation());
+                        players.get(message.GetID()).GetRigidBodyControl().setPhysicsRotation(message.GetRotation());
+
+                        return null;
+                    }
+                });
+
+            }
+
+            if (m instanceof AddImpulseToPlayerMessage) {
+                final AddImpulseToPlayerMessage message = (AddImpulseToPlayerMessage) m;
+
+                players.get(message.GetID()).GetRigidBodyControl().applyImpulse(message.GetDirection(), Vector3f.ZERO);
+            }
+
+        }
+    }
 
 // </editor-fold>
 }
