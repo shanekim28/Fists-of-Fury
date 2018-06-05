@@ -24,6 +24,7 @@ import com.jme3.scene.shape.Box;
 import com.jme3.bullet.collision.PhysicsCollisionListener;
 import com.jme3.network.Client;
 import mygame.NetworkUtility.AddImpulseToPlayerMessage;
+import mygame.NetworkUtility.PlayerLeftMessage;
 import mygame.NetworkUtility.UpdatePlayerLocationMessage;
 
 /**
@@ -112,7 +113,7 @@ public class Player extends AbstractAppState implements PhysicsCollisionListener
 
 	inputDir.x = x;
 	inputDir.y = y;
-	System.out.println(inputDir.toString() + " " + charge);
+	//System.out.println(inputDir.toString() + " " + charge);
 
 	// Behaviour goes here
 	if (IsCharging()) {
