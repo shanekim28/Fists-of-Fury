@@ -23,6 +23,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import mygame.NetworkUtility.AddImpulseToPlayerMessage;
 import mygame.NetworkUtility.NetworkMessage;
+import mygame.NetworkUtility.PlayerLeftMessage;
 import mygame.NetworkUtility.ReadyMessage;
 import mygame.NetworkUtility.SpawnPlayerWithIDAtLocationMessage;
 import mygame.NetworkUtility.UpdatePlayerLocationMessage;
@@ -96,10 +97,10 @@ public class ServerMain extends SimpleApplication implements ConnectionListener 
 
     @Override
     public void connectionRemoved(Server server, HostedConnection conn) {
+        server.broadcast(Filters.notIn(conn), new PlayerLeftMessage(conn.getId()));
         System.out.println("Client " + conn.getId() + " has disconnected.");
         playersReady.remove(conn.getId());
         System.out.println(playersReady.values());
-
     }
 
     private class ServerMessageListener implements MessageListener<HostedConnection> {
@@ -133,6 +134,12 @@ public class ServerMain extends SimpleApplication implements ConnectionListener 
                 final AddImpulseToPlayerMessage message = (AddImpulseToPlayerMessage) m;
 
                 server.broadcast(Filters.notIn(source), new AddImpulseToPlayerMessage(message.GetDirection(), message.GetID()));
+            }
+            
+            if (m instanceof PlayerLeftMessage) {
+                final PlayerLeftMessage message = (PlayerLeftMessage) m;
+                
+                server.broadcast(Filters.notIn(source), new PlayerLeftMessage(message.GetID()));
             }
 
             if (!started) {
