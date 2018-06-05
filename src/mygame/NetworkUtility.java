@@ -26,6 +26,7 @@ public class NetworkUtility {
         Serializer.registerClass(SpawnPlayerWithIDAtLocationMessage.class);
         Serializer.registerClass(AddImpulseToPlayerMessage.class);
         Serializer.registerClass(UpdatePlayerLocationMessage.class);
+        Serializer.registerClass(PlayerLeftMessage.class);
     }
 
     @Serializable
@@ -140,6 +141,24 @@ public class NetworkUtility {
         
         public Quaternion GetRotation() {
             return rot;
+        }
+        
+        public int GetID() {
+            return id;
+        }
+    }
+    
+    @Serializable
+    public static class PlayerLeftMessage extends AbstractMessage {
+
+        int id;
+        
+        public PlayerLeftMessage() {
+
+        }
+
+        public PlayerLeftMessage(int _id) {
+            id = _id;
         }
         
         public int GetID() {
