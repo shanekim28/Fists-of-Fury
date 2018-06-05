@@ -20,6 +20,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import mygame.NetworkUtility.AddImpulseToPlayerMessage;
 import mygame.NetworkUtility.NetworkMessage;
+import mygame.NetworkUtility.PlayerLeftMessage;
 import mygame.NetworkUtility.ReadyMessage;
 import mygame.NetworkUtility.SpawnPlayerWithIDAtLocationMessage;
 import mygame.NetworkUtility.UpdatePlayerLocationMessage;
@@ -152,7 +153,13 @@ public class ClientMain extends SimpleApplication implements ClientStateListener
 
                 players.get(message.GetID()).GetRigidBodyControl().applyImpulse(message.GetDirection(), Vector3f.ZERO);
             }
-
+            
+            if (m instanceof PlayerLeftMessage) {
+                final PlayerLeftMessage message = (PlayerLeftMessage) m;
+                
+                players.get(message.GetID()).node.detachChild(players.get(message.GetID()).playerObject);
+            }
+            
         }
     }
 
