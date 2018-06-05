@@ -1,0 +1,10 @@
+Material Level : Common/MatDefs/Light/Lighting.j3md {
+     MaterialParameters {
+        VertexLighting : false
+        UseMaterialColors : true
+        Diffuse : 0.69803923 0.74509805 0.79607844 1.0
+        Ambient : 0.5176471 0.6 0.6784314 1.0
+     }
+    AdditionalRenderState {
+    }
+}

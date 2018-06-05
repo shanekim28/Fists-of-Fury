@@ -6,6 +6,7 @@
 package mygame;
 
 import com.jme3.app.SimpleApplication;
+import com.jme3.font.BitmapFont;
 import com.jme3.math.Vector3f;
 import com.jme3.network.Client;
 import com.jme3.network.ClientStateListener;
@@ -35,6 +36,8 @@ public class ClientMain extends SimpleApplication implements ClientStateListener
 
     private static Client client;
     private boolean isReady = false;
+    
+    //BitmapText readyText = new BitmapText(assetManager.loadFont("Interface/Fonts/Console.fnt"));
 
     public static void main(String[] args) {
         ClientMain app = new ClientMain();
@@ -51,6 +54,9 @@ public class ClientMain extends SimpleApplication implements ClientStateListener
             stateManager.detach(lobbyState);
             client.send(new NetworkMessage("Client " + client.getId() + " is ready!"));
             client.send(new ReadyMessage(client.getId(), true));
+	    
+	    //readyText.setColor(ColorRGBA.Green);                             // font color
+	   // readyText.setText("Ready!");             // the text
         }
     }
 
@@ -71,7 +77,12 @@ public class ClientMain extends SimpleApplication implements ClientStateListener
         lobbyState = new LobbyState(client, this);
         lobbyState.Init();
         stateManager.attach(lobbyState);
-
+	
+	//readyText.setSize(guiFont.getCharSet().getRenderedSize());      // font size
+	//readyText.setColor(ColorRGBA.Red);                             // font color
+	//.setText("Press [SPACEBAR] to ready up!");             // the text
+	//readyText.setLocalTranslation(300, readyText.getLineHeight(), 0); // position
+	//guiNode.attachChild(readyText);
     }
 
     public void SetReady(boolean ready) {
@@ -99,7 +110,7 @@ public class ClientMain extends SimpleApplication implements ClientStateListener
 
     @Override
     public void clientDisconnected(Client c, DisconnectInfo info) {
-
+	
     }
 
     private class ClientMessageListener implements MessageListener<Client> {

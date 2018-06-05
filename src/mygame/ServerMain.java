@@ -14,6 +14,7 @@ import com.jme3.network.Message;
 import com.jme3.network.MessageListener;
 import com.jme3.network.Network;
 import com.jme3.network.Server;
+import com.jme3.network.service.serializer.ServerSerializerRegistrationsService;
 import com.jme3.system.JmeContext;
 import java.io.IOException;
 import java.util.HashMap;
@@ -37,12 +38,15 @@ public class ServerMain extends SimpleApplication implements ConnectionListener 
     static HashMap<Integer, Boolean> playersReady = new HashMap<>();
 
     private static Server server;
+    ServerMain app;
 
     public static void main(String[] args) {
         ServerMain app = new ServerMain();
         app.start(JmeContext.Type.Headless);
-
+	
         NetworkUtility.InitializeSerializables();
+	
+	ClientMain.main(null);
     }
 
     @Override
@@ -62,6 +66,7 @@ public class ServerMain extends SimpleApplication implements ConnectionListener 
     public void simpleUpdate(float tpf) {
         if (started && server.getConnections().isEmpty()) {
             started = false;
+	    app.stop();
         }
     }
 

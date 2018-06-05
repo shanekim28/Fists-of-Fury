@@ -2,9 +2,9 @@ Material EnemyPlayer : Common/MatDefs/Light/Lighting.j3md {
      MaterialParameters {
         VertexLighting : false
         UseMaterialColors : true
-        Diffuse : 0.32941177 0.5882353 0.6901961 1.0
+        Diffuse : 0.8745098 0.8039216 0.5529412 1.0
         GlowColor : 1.0 1.0 1.0 1.0
-        Ambient : 0.21960784 0.40392157 0.47843137 1.0
+        Ambient : 0.7921569 0.6745098 0.2627451 1.0
      }
     AdditionalRenderState {
     }

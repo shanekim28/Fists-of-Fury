@@ -15,14 +15,12 @@ public class Main extends SimpleApplication {
     Player player;
 
     public static void main(String[] args) {
-        Main app = new Main();
-        app.start();
+	ServerMain.main(null);
     }
 
     @Override
     public void simpleInitApp() {
-
-        
+	
     }
 
     @Override

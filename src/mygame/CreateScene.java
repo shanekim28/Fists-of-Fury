@@ -10,6 +10,7 @@ import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
+import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
@@ -38,9 +39,9 @@ public class CreateScene {
 
         app.getStateManager().attach(bulletAppState);
 
-        bulletAppState.setDebugEnabled(true); // Debug purposes - draws colliders
+        //bulletAppState.setDebugEnabled(true); // Debug purposes - draws colliders
 
-        app.getViewPort().setBackgroundColor(new ColorRGBA(0.7f, 0.8f, 1f, 1f));
+        app.getViewPort().setBackgroundColor(new ColorRGBA(33f/255f, 32f/255f, 34f/255f, 1f));
 
         app.getFlyByCamera().setEnabled(false);
 
@@ -59,6 +60,8 @@ public class CreateScene {
         // Finds the object called "Arena" and attaches a RigidBodyControl to it
         Spatial arena = rootNode.getChild("Arena");
         bulletAppState.getPhysicsSpace().add(arena.getControl(RigidBodyControl.class));
+	
+	arena.setMaterial((Material) app.getAssetManager().loadMaterial("Materials/Level.j3m"));
     }
 
     private void SetupLight() {

@@ -20,6 +20,7 @@ public class NetworkUtility {
     public static int port = 6000;
 
     public static void InitializeSerializables() {
+	Serializer.setReadOnly(false);
         Serializer.registerClass(NetworkMessage.class);
         Serializer.registerClass(ReadyMessage.class);
         Serializer.registerClass(SpawnPlayerWithIDAtLocationMessage.class);
