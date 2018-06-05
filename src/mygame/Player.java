@@ -46,10 +46,8 @@ public class Player extends AbstractAppState implements PhysicsCollisionListener
     Vector3f walkDirection = new Vector3f();
     boolean charging = false;
     boolean anchored = false;
-
+    
     int boundary = 75;
-
-    int jumpCharges = 2;
 
     public Geometry playerObject;
 
@@ -199,7 +197,7 @@ public class Player extends AbstractAppState implements PhysicsCollisionListener
 	    }
 
 	    if ((name.equals("Left") || name.equals("Right") || name.equals("Up") || name.equals("Down")) && !keyPressed) {
-		if (jumpCharges > 0) {
+		if (!anchored) {
 		    float force = strength * charge;
 		    Vector3f dir = new Vector3f(inputDir.x, inputDir.y, 0).mult(strength * charge);
 
@@ -270,6 +268,6 @@ public class Player extends AbstractAppState implements PhysicsCollisionListener
 
     @Override
     public void collision(PhysicsCollisionEvent event) {
-	jumpCharges = 2;
+	
     }
 }
