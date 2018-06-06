@@ -1,0 +1,32 @@
+package mygame;
+
+import com.jme3.app.SimpleApplication;
+
+/**
+ * This is the Main Class of your Game. You should only do initialization here.
+ * Move your Logic into AppStates or Controls
+ *
+ * @author normenhansen
+ */
+public class Main extends SimpleApplication {
+
+    
+    private boolean isRunning = true;
+    Player player;
+
+    public static void main(String[] args) {
+	ServerMain.main(null);
+    }
+
+    @Override
+    public void simpleInitApp() {
+	
+    }
+
+    @Override
+    public void simpleUpdate(float tpf) {
+        //TODO: add update code
+
+    }
+
+}
