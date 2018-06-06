@@ -10,22 +10,35 @@ import com.jme3.app.SimpleApplication;
  */
 public class Main extends SimpleApplication {
 
-    
     private boolean isRunning = true;
     Player player;
 
     public static void main(String[] args) {
-	ServerMain.main(null);
+        Main app = new Main();
+        app.start();
+        
+        ServerMain.main(null);
+
     }
 
     @Override
     public void simpleInitApp() {
-	
+        
+        
     }
 
     @Override
     public void simpleUpdate(float tpf) {
-        //TODO: add update code
+        /* TODO Put GUI code here
+        *
+        * Start server when button pressed
+        * ServerMain.main(null);
+        *
+        * Get IP from input text
+        * Start client with IP from text box when button pressed
+        * ClientMain.main(null);
+        *
+        */
 
     }
 
