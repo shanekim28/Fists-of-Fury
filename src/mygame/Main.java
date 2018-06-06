@@ -3,6 +3,7 @@ package mygame;
 // Various imports
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
+<<<<<<< HEAD
 import com.jme3.bullet.BulletAppState;
 import com.jme3.input.KeyInput;
 import com.jme3.light.AmbientLight;
@@ -21,6 +22,8 @@ import com.jme3.math.Vector3f;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+=======
+>>>>>>> Networking
 
 /**
  * This is the Main Class of your Game. You should only do initialization here.
@@ -30,6 +33,7 @@ import com.jme3.scene.Spatial;
  * @author ryan
  */
 public class Main extends SimpleApplication {
+<<<<<<< HEAD
     // Scene
     //Spatial scene;
     // Used for physics
@@ -46,6 +50,18 @@ public class Main extends SimpleApplication {
     public static void main(String[] args) {
         app = new Main();
         app.start();
+=======
+
+    private boolean isRunning = true;
+    Player player;
+
+    public static void main(String[] args) {
+        Main app = new Main();
+        app.start();
+        
+        ServerMain.main(null);
+
+>>>>>>> Networking
     }
 
     @Override
@@ -53,6 +69,7 @@ public class Main extends SimpleApplication {
      * Calls niftySetUp() to set up the main menu
      */
     public void simpleInitApp() {
+<<<<<<< HEAD
         // Prevents the displaying of game statistics
         //setDisplayFps(false);
         //setDisplayStatView(false);
@@ -76,6 +93,10 @@ public class Main extends SimpleApplication {
       //  stateManager.attach(player);
         //SetupLight();
        // SetupScene();
+=======
+        
+        
+>>>>>>> Networking
     }
 
     @Override
@@ -83,6 +104,7 @@ public class Main extends SimpleApplication {
      * Updates the game
      */
     public void simpleUpdate(float tpf) {
+<<<<<<< HEAD
         
     }
 //
@@ -125,4 +147,19 @@ public class Main extends SimpleApplication {
         // Calls onEnable
         screen1.onEnable();
     }
+=======
+        /* TODO Put GUI code here
+        *
+        * Start server when button pressed
+        * ServerMain.main(null);
+        *
+        * Get IP from input text
+        * Start client with IP from text box when button pressed
+        * ClientMain.main(null);
+        *
+        */
+
+    }
+
+>>>>>>> Networking
 }
