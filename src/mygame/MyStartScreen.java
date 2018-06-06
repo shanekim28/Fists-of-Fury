@@ -120,20 +120,25 @@ public class MyStartScreen extends BaseAppState implements ScreenController {
         //throw new UnsupportedOperationException("Not supported yet.");
     }
     
+    public void StartServer() {
+        ServerMain.main(null);
+    }
+    
+    public void StartClient(String nextScreen) {
+        
+    }
+    
     public void startGame(String nextScreen) {
         runner = true;
         bulletAppState = new BulletAppState();
         application.getStateManager().attach(bulletAppState);
 
-        //bulletAppState.setDebugEnabled(true); // Debug purposes - draws colliders
-
         //Create new player, passing in this as a SimpleApplication
         nifty.gotoScreen(nextScreen);
-        Player player = new Player(application);
-        player.Initialize();
+        
+        ClientMain.main(null);
         application.getViewPort().setBackgroundColor(new ColorRGBA(0.7f, 0.8f, 1f, 1f));
         application.getCamera().setLocation(new Vector3f(0, 4.5f, 26.5f));
-        application.getStateManager().attach(player);
         SetUpLight();
         SetupScene();
     }

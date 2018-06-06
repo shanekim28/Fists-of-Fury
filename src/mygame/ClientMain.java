@@ -12,6 +12,7 @@ import com.jme3.network.ClientStateListener;
 import com.jme3.network.Message;
 import com.jme3.network.MessageListener;
 import com.jme3.network.Network;
+import com.jme3.system.AppSettings;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
@@ -33,32 +34,23 @@ public class ClientMain extends SimpleApplication implements ClientStateListener
     ArrayList<Player> players = new ArrayList<>();
 
     LobbyState lobbyState;
+    
+    static String address = "localhost";
 
     private static Client client;
     private boolean isReady = false;
-    
-    //BitmapText readyText = new BitmapText(assetManager.loadFont("Interface/Fonts/Console.fnt"));
 
     public static void main(String[] args) {
         ClientMain app = new ClientMain();
+        app.setSettings(new AppSettings(false));
         app.start();
 
         NetworkUtility.InitializeSerializables();
 
         app.setPauseOnLostFocus(false);
     }
-
-    @Override
-    public void simpleUpdate(float tpf) {
-        if (isReady && stateManager.hasState(lobbyState)) {
-            stateManager.detach(lobbyState);
-            client.send(new NetworkMessage("Client " + client.getId() + " is ready!"));
-            client.send(new ReadyMessage(client.getId(), true));
-	    
-	    //readyText.setColor(ColorRGBA.Green);                             // font color
-	   // readyText.setText("Ready!");             // the text
-        }
-    }
+    
+    
 
     @Override
     public void simpleInitApp() {
@@ -77,16 +69,23 @@ public class ClientMain extends SimpleApplication implements ClientStateListener
         lobbyState = new LobbyState(client, this);
         lobbyState.Init();
         stateManager.attach(lobbyState);
-	
-	//readyText.setSize(guiFont.getCharSet().getRenderedSize());      // font size
-	//readyText.setColor(ColorRGBA.Red);                             // font color
-	//.setText("Press [SPACEBAR] to ready up!");             // the text
-	//readyText.setLocalTranslation(300, readyText.getLineHeight(), 0); // position
-	//guiNode.attachChild(readyText);
+    }
+
+    @Override
+    public void simpleUpdate(float tpf) {
+        if (isReady && stateManager.hasState(lobbyState)) {
+            stateManager.detach(lobbyState);
+            client.send(new NetworkMessage("Client " + client.getId() + " is ready!"));
+            client.send(new ReadyMessage(client.getId(), true));
+        }
     }
 
     public void SetReady(boolean ready) {
         isReady = ready;
+    }
+    
+    public static void SetAddress(String _ip) {
+        address = _ip;
     }
 
     public void SpawnPlayer(Vector3f location, int id) {

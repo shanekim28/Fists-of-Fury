@@ -45,8 +45,8 @@ public class ServerMain extends SimpleApplication implements ConnectionListener 
         app.start(JmeContext.Type.Headless);
 	
         NetworkUtility.InitializeSerializables();
-	
-	ClientMain.main(null);
+        
+        ClientMain.main(null);
     }
 
     @Override

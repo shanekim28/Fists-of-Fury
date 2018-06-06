@@ -2,21 +2,19 @@ package mygame;
 
 // Various imports
 import com.jme3.app.Application;
-import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.niftygui.NiftyJmeDisplay;
 import de.lessvoid.nifty.Nifty;
-import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.builder.ImageBuilder;
 import de.lessvoid.nifty.builder.LayerBuilder;
 import de.lessvoid.nifty.builder.PanelBuilder;
 import de.lessvoid.nifty.builder.ScreenBuilder;
 import de.lessvoid.nifty.builder.TextBuilder;
+import de.lessvoid.nifty.controls.TextField;
 import de.lessvoid.nifty.controls.button.builder.ButtonBuilder;
 import de.lessvoid.nifty.controls.label.builder.LabelBuilder;
 import de.lessvoid.nifty.screen.DefaultScreenController;
-import de.lessvoid.nifty.screen.ScreenController;
-import de.lessvoid.nifty.controls.NiftyControl;
+import de.lessvoid.nifty.controls.textfield.builder.TextFieldBuilder;
 
 /*
 * @author ryan
@@ -28,6 +26,7 @@ public class MenuScreen extends BaseAppState {
     // Instance variables
     private NiftyJmeDisplay nifty;
     private Application app;
+    String ipText;
 
     /**
      *
@@ -161,13 +160,7 @@ public class MenuScreen extends BaseAppState {
                                 width("90%");
                                 // add control
                                 //control(new TextFieldBuilder("Network", "N")  {
-                                       
-                                           
-                                        
 
-                                    
-
-                                
                             }
                         });
 
@@ -178,6 +171,15 @@ public class MenuScreen extends BaseAppState {
                                 height("15%");
                                 width("90%");
 
+                                control(new TextFieldBuilder("address", "IP Address") {
+                                    {
+                                        alignRight();
+                                        valignCenter();
+                                        height("50%");
+                                        width("20%");
+                                    }
+                                });
+
                                 // add control
                                 control(new ButtonBuilder("JoinButton", "Join") {
                                     {
@@ -185,6 +187,8 @@ public class MenuScreen extends BaseAppState {
                                         valignCenter();
                                         height("50%");
                                         width("20%");
+
+                                        interactOnClick("startGame(hud)");
                                     }
 
                                 });
@@ -205,8 +209,9 @@ public class MenuScreen extends BaseAppState {
                                         valignCenter();
                                         height("50%");
                                         width("20%");
+                                        
+                                        interactOnClick("StartServer()");
                                     }
-
                                 });
                             }
                         });
@@ -326,5 +331,6 @@ public class MenuScreen extends BaseAppState {
     @Override
     public void update(float tpf) {
         //TODO: implement behavior during runtime
+        //ipText = nifty.getNifty().getCurrentScreen().findNiftyControl("address", TextField.class).getRealText();
     }
 }
