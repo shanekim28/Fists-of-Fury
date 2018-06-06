@@ -25,6 +25,8 @@ public class MenuScreen extends BaseAppState {
 
     // Instance variables
     private NiftyJmeDisplay nifty;
+	
+	MyStartScreen myStartScreen;
     private Application app;
     String ipText;
 
@@ -36,6 +38,8 @@ public class MenuScreen extends BaseAppState {
     public MenuScreen(NiftyJmeDisplay nifty, Application app) {
         this.nifty = nifty;
         this.app = app;
+		
+		myStartScreen = new MyStartScreen(this.app, this.nifty);
     }
 
     @Override
@@ -70,7 +74,7 @@ public class MenuScreen extends BaseAppState {
             {
                 // Uses MyStartScreen class as screen controller
                 // Passes app and nifty as parameters
-                controller(new mygame.MyStartScreen(app, nifty));
+                controller(myStartScreen);
 
                 // Adds layer named background
                 layer(new LayerBuilder("background") {
@@ -110,7 +114,6 @@ public class MenuScreen extends BaseAppState {
                                 });
                             }
                         });
-
                         panel(new PanelBuilder("panel_mid") {
                             {
                                 childLayoutCenter();
@@ -187,6 +190,8 @@ public class MenuScreen extends BaseAppState {
                                         valignCenter();
                                         height("50%");
                                         width("20%");
+										
+										nifty.getNifty().getCurrentScreen().findNiftyControl("address", TextField.class).getRealText();
 
                                         interactOnClick("startGame(hud)");
                                     }

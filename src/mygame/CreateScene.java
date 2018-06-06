@@ -21,58 +21,58 @@ import com.jme3.scene.Spatial;
  * @author shane
  */
 public class CreateScene {
-    private SimpleApplication app;
-    Spatial scene;
-    BulletAppState bulletAppState;
-    RigidBodyControl landscape;
-    
-    Node rootNode;
 
-    public CreateScene(SimpleApplication _app) {
-        app = _app;
-        rootNode = app.getRootNode();
-    }
+	private SimpleApplication app;
+	Spatial scene;
+	BulletAppState bulletAppState;
+	RigidBodyControl landscape;
 
-    public void Initialize() {
-        // Setup physics
-        bulletAppState = new BulletAppState();
+	Node rootNode;
 
-        app.getStateManager().attach(bulletAppState);
+	public CreateScene(SimpleApplication _app) {
+		app = _app;
+		rootNode = app.getRootNode();
+	}
 
-        //bulletAppState.setDebugEnabled(true); // Debug purposes - draws colliders
+	public void Initialize() {
+		// Setup physics
+		bulletAppState = new BulletAppState();
 
-        app.getViewPort().setBackgroundColor(new ColorRGBA(33f/255f, 32f/255f, 34f/255f, 1f));
+		app.getStateManager().attach(bulletAppState);
 
-        app.getFlyByCamera().setEnabled(false);
+		//bulletAppState.setDebugEnabled(true); // Debug purposes - draws colliders
+		app.getViewPort().setBackgroundColor(new ColorRGBA(33f / 255f, 32f / 255f, 34f / 255f, 1f));
 
-        app.getCamera().setLocation(new Vector3f(0, 4.5f, 26.5f));
+		app.getFlyByCamera().setEnabled(false);
 
-        SetupLight();
+		app.getCamera().setLocation(new Vector3f(0, 4.5f, 26.5f));
 
-        SetupScene();
-    }
+		SetupLight();
 
-    private void SetupScene() {
-        // Load our scene from the scene composer
-        Spatial scene = app.getAssetManager().loadModel("Scenes/Scene.j3o");
-        rootNode.attachChild(scene);
+		SetupScene();
+	}
 
-        // Finds the object called "Arena" and attaches a RigidBodyControl to it
-        Spatial arena = rootNode.getChild("Arena");
-        bulletAppState.getPhysicsSpace().add(arena.getControl(RigidBodyControl.class));
-	
-	arena.setMaterial((Material) app.getAssetManager().loadMaterial("Materials/Level.j3m"));
-    }
+	private void SetupScene() {
+		// Load our scene from the scene composer
+		Spatial scene = app.getAssetManager().loadModel("Scenes/Scene.j3o");
+		rootNode.attachChild(scene);
 
-    private void SetupLight() {
-        AmbientLight aL = new AmbientLight();
-        aL.setColor(ColorRGBA.White);
-        rootNode.addLight(aL);
+		// Finds the object called "Arena" and attaches a RigidBodyControl to it
+		Spatial arena = rootNode.getChild("Arena");
+		bulletAppState.getPhysicsSpace().add(arena.getControl(RigidBodyControl.class));
 
-        DirectionalLight dL = new DirectionalLight();
-        dL.setColor(ColorRGBA.White);
-        dL.setDirection(new Vector3f(2.8f, -2.8f, -2.8f).normalizeLocal());
-        rootNode.addLight(dL);
-    }
+		arena.setMaterial((Material) app.getAssetManager().loadMaterial("Materials/Level.j3m"));
+	}
+
+	private void SetupLight() {
+		AmbientLight aL = new AmbientLight();
+		aL.setColor(ColorRGBA.White);
+		rootNode.addLight(aL);
+
+		DirectionalLight dL = new DirectionalLight();
+		dL.setColor(ColorRGBA.White);
+		dL.setDirection(new Vector3f(2.8f, -2.8f, -2.8f).normalizeLocal());
+		rootNode.addLight(dL);
+	}
 
 }

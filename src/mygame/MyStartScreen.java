@@ -6,27 +6,12 @@
 package mygame;
 
 import com.jme3.app.Application;
-import com.jme3.app.LegacyApplication;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.bullet.BulletAppState;
-import com.jme3.bullet.control.RigidBodyControl;
-import com.jme3.light.AmbientLight;
-import com.jme3.light.DirectionalLight;
-import com.jme3.math.ColorRGBA;
-import com.jme3.math.Vector3f;
 import com.jme3.niftygui.NiftyJmeDisplay;
-import com.jme3.scene.Spatial;
 import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.screen.Screen;
-import de.lessvoid.nifty.builder.ImageBuilder;
-import de.lessvoid.nifty.builder.LayerBuilder;
-import de.lessvoid.nifty.builder.PanelBuilder;
-import de.lessvoid.nifty.builder.ScreenBuilder;
-import de.lessvoid.nifty.builder.TextBuilder;
-import de.lessvoid.nifty.controls.button.builder.ButtonBuilder;
-import de.lessvoid.nifty.controls.label.builder.LabelBuilder;
-import de.lessvoid.nifty.screen.DefaultScreenController;
 import de.lessvoid.nifty.screen.ScreenController;
 
 
@@ -39,7 +24,8 @@ public class MyStartScreen extends BaseAppState implements ScreenController {
     private SimpleApplication application;
     // Nifty gui
     private Nifty nifty;
-    private boolean runner = false;
+    public boolean runner = false;
+	public String address = "localhost";
     BulletAppState bulletAppState;
     
     // Initializes variables
@@ -128,45 +114,14 @@ public class MyStartScreen extends BaseAppState implements ScreenController {
         
     }
     
-    public void startGame(String nextScreen) {
-        runner = true;
-        bulletAppState = new BulletAppState();
-        application.getStateManager().attach(bulletAppState);
-
+    public void startGame(String nextScreen, String ip) {
+		runner = true;
         //Create new player, passing in this as a SimpleApplication
         nifty.gotoScreen(nextScreen);
-        
-        ClientMain.main(null);
-        application.getViewPort().setBackgroundColor(new ColorRGBA(0.7f, 0.8f, 1f, 1f));
-        application.getCamera().setLocation(new Vector3f(0, 4.5f, 26.5f));
-        SetUpLight();
-        SetupScene();
     }
     
     public void quitGame() {
         ((Application) application).stop();       
-    }
-    
-    
-    private void SetUpLight() {
-        AmbientLight aL = new AmbientLight();
-        aL.setColor(ColorRGBA.White);
-        (application.getRootNode()).addLight(aL);
-
-        DirectionalLight dL = new DirectionalLight();
-        dL.setColor(ColorRGBA.White);
-        dL.setDirection(new Vector3f(2.8f, -2.8f, -2.8f).normalizeLocal());
-        (application.getRootNode()).addLight(dL);
-    }
-    
-    private void SetupScene() {
-        // Load our scene from the scene composer
-        Spatial scene = application.getAssetManager().loadModel("Scenes/Scene.j3o");
-        (application.getRootNode()).attachChild(scene);
-
-        // Finds the object called "Arena" and attaches a RigidBodyControl to it
-        Spatial arena = (application.getRootNode()).getChild("Arena");
-        bulletAppState.getPhysicsSpace().add(arena.getControl(RigidBodyControl.class));
     }
    
 }

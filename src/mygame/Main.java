@@ -1,9 +1,7 @@
 package mygame;
 
 // Various imports
-import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
-import com.jme3.niftygui.NiftyJmeDisplay;
 
 /**
  * This is the Main Class of your Game. You should only do initialization here.
@@ -34,7 +32,7 @@ public class Main extends SimpleApplication {
         app = new Main();
         app.start();
 
-        ServerMain.main(null);
+        //ServerMain.main(null);
     }
 
     @Override
@@ -43,7 +41,7 @@ public class Main extends SimpleApplication {
      */
     public void simpleInitApp() {
         // Calls niftySetUp()
-        //niftySetUp();
+        
     }
 
     @Override
@@ -57,18 +55,7 @@ public class Main extends SimpleApplication {
      * Creates nifty (NiftyJmeDisplay) and passes it as a parameter to
      * MenuScreen class Calls onEnable to build the layout of the mainmenu
      */
-    public void niftySetUp() {
-        // Creates nifty, an object of NiftyJmedisplay
-        NiftyJmeDisplay nifty = new NiftyJmeDisplay(assetManager, inputManager, audioRenderer, guiViewPort);
-        // Sets fly camera to false
-        flyCam.setEnabled(false);
-        // Creates object of MenuScreen with nifty and the application as parameters
-        MenuScreen screen1 = new MenuScreen(nifty, (Application) app);
-        // Allows the nifty to viewed
-        guiViewPort.addProcessor(nifty);
-        // Calls onEnable
-        screen1.onEnable();
-    }
+    
     /* TODO Put GUI code here
         *
         * Start server when button pressed

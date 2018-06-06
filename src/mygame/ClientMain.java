@@ -5,6 +5,7 @@
  */
 package mygame;
 
+import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.math.Vector3f;
 import com.jme3.network.Client;
@@ -12,7 +13,7 @@ import com.jme3.network.ClientStateListener;
 import com.jme3.network.Message;
 import com.jme3.network.MessageListener;
 import com.jme3.network.Network;
-import com.jme3.system.AppSettings;
+import com.jme3.niftygui.NiftyJmeDisplay;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
@@ -36,26 +37,42 @@ public class ClientMain extends SimpleApplication implements ClientStateListener
     LobbyState lobbyState;
     
     static String address = "localhost";
+	MenuScreen screen1;
+	static ClientMain app;
 
     private static Client client;
     private boolean isReady = false;
 
     public static void main(String[] args) {
-        ClientMain app = new ClientMain();
-        app.setSettings(new AppSettings(false));
+        app = new ClientMain();
         app.start();
-
+		
         NetworkUtility.InitializeSerializables();
 
         app.setPauseOnLostFocus(false);
     }
     
-    
+    public void niftySetUp() {
+        // Creates nifty, an object of NiftyJmedisplay
+        NiftyJmeDisplay nifty = new NiftyJmeDisplay(assetManager, inputManager, audioRenderer, guiViewPort);
+        // Sets fly camera to false
+        flyCam.setEnabled(false);
+        // Creates object of MenuScreen with nifty and the application as parameters
+        screen1 = new MenuScreen(nifty, (Application) app);
+        // Allows the nifty to viewed
+        guiViewPort.addProcessor(nifty);
+        // Calls onEnable
+        screen1.onEnable();
+    }
 
     @Override
     public void simpleInitApp() {
-        try {
-            client = Network.connectToServer("localhost", NetworkUtility.port);
+		niftySetUp();
+    }
+	
+	public void JoinGame() {
+		try {
+            client = Network.connectToServer(address, NetworkUtility.port);
             client.start();
         } catch (IOException e) {
             Logger.getLogger(ClientMain.class.getName()).log(Level.SEVERE, null, e);
@@ -69,10 +86,15 @@ public class ClientMain extends SimpleApplication implements ClientStateListener
         lobbyState = new LobbyState(client, this);
         lobbyState.Init();
         stateManager.attach(lobbyState);
-    }
+	}
 
     @Override
     public void simpleUpdate(float tpf) {
+		if (screen1.myStartScreen.runner) {
+			JoinGame();
+			screen1.myStartScreen.runner = false;
+		}
+		
         if (isReady && stateManager.hasState(lobbyState)) {
             stateManager.detach(lobbyState);
             client.send(new NetworkMessage("Client " + client.getId() + " is ready!"));
@@ -155,7 +177,8 @@ public class ClientMain extends SimpleApplication implements ClientStateListener
             if (m instanceof PlayerLeftMessage) {
                 final PlayerLeftMessage message = (PlayerLeftMessage) m;
                 
-                players.get(message.GetID()).node.detachChild(players.get(message.GetID()).playerObject);
+				if (players.get(message.GetID()) != null)
+					players.get(message.GetID()).node.detachChild(players.get(message.GetID()).playerObject);
             }
             
         }
