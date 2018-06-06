@@ -25,6 +25,7 @@ import mygame.NetworkUtility.PlayerLeftMessage;
 import mygame.NetworkUtility.ReadyMessage;
 import mygame.NetworkUtility.SpawnPlayerWithIDAtLocationMessage;
 import mygame.NetworkUtility.UpdatePlayerLocationMessage;
+import mygame.NetworkUtility.UpdatePlayerMassMessage;
 
 /**
  *
@@ -173,6 +174,12 @@ public class ClientMain extends SimpleApplication implements ClientStateListener
 
                 players.get(message.GetID()).GetRigidBodyControl().applyImpulse(message.GetDirection(), Vector3f.ZERO);
             }
+	    
+	    if (m instanceof UpdatePlayerMassMessage) {
+		final UpdatePlayerMassMessage message = (UpdatePlayerMassMessage) m;
+		
+		players.get(message.GetID()).GetRigidBodyControl().setMass(message.GetMass());
+	    }
             
             if (m instanceof PlayerLeftMessage) {
                 final PlayerLeftMessage message = (PlayerLeftMessage) m;

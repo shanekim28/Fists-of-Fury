@@ -27,6 +27,7 @@ import mygame.NetworkUtility.PlayerLeftMessage;
 import mygame.NetworkUtility.ReadyMessage;
 import mygame.NetworkUtility.SpawnPlayerWithIDAtLocationMessage;
 import mygame.NetworkUtility.UpdatePlayerLocationMessage;
+import mygame.NetworkUtility.UpdatePlayerMassMessage;
 
 /**
  *
@@ -136,6 +137,12 @@ public class ServerMain extends SimpleApplication implements ConnectionListener 
 				final AddImpulseToPlayerMessage message = (AddImpulseToPlayerMessage) m;
 
 				server.broadcast(Filters.notIn(source), new AddImpulseToPlayerMessage(message.GetDirection(), message.GetID()));
+			}
+			
+			if (m instanceof UpdatePlayerMassMessage) {
+				final UpdatePlayerMassMessage message = (UpdatePlayerMassMessage) m;
+
+				server.broadcast(Filters.notIn(source), new UpdatePlayerMassMessage(message.GetMass(), message.GetID()));
 			}
 
 			if (m instanceof PlayerLeftMessage) {

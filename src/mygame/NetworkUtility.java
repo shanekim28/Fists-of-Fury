@@ -26,6 +26,7 @@ public class NetworkUtility {
         Serializer.registerClass(SpawnPlayerWithIDAtLocationMessage.class);
         Serializer.registerClass(AddImpulseToPlayerMessage.class);
         Serializer.registerClass(UpdatePlayerLocationMessage.class);
+	Serializer.registerClass(UpdatePlayerMassMessage.class);
         Serializer.registerClass(PlayerLeftMessage.class);
     }
 
@@ -112,6 +113,30 @@ public class NetworkUtility {
         // Although this says direction, it also means the entire force vector
         public Vector3f GetDirection() {
             return dir;
+        }
+
+        public int GetID() {
+            return id;
+        }
+    }
+    
+    @Serializable
+    public static class UpdatePlayerMassMessage extends AbstractMessage {
+
+        float mass;
+        int id;
+
+        public UpdatePlayerMassMessage() {
+        }
+
+        public UpdatePlayerMassMessage(float _mass, int _id) {
+            mass = _mass;
+            id = _id;
+        }
+
+        // Although this says direction, it also means the entire force vector
+        public float GetMass() {
+            return mass;
         }
 
         public int GetID() {

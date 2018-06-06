@@ -25,6 +25,7 @@ import com.jme3.bullet.collision.PhysicsCollisionListener;
 import com.jme3.network.Client;
 import mygame.NetworkUtility.AddImpulseToPlayerMessage;
 import mygame.NetworkUtility.UpdatePlayerLocationMessage;
+import mygame.NetworkUtility.UpdatePlayerMassMessage;
 
 /**
  *
@@ -46,7 +47,7 @@ public class Player extends AbstractAppState implements PhysicsCollisionListener
     Vector3f walkDirection = new Vector3f();
     boolean charging = false;
     boolean anchored = false;
-    
+
     int boundary = 75;
 
     public Geometry playerObject;
@@ -74,6 +75,8 @@ public class Player extends AbstractAppState implements PhysicsCollisionListener
 	damagePercent = 0;
 	speed = defense = strength = 5;
 	position = new Vector3f(0, 0, 0);
+
+	bulletAppState.getPhysicsSpace().addCollisionListener(this);
     }
 
     public Player(SimpleApplication _app, int _speed, int _defense, int _strength) {
@@ -86,6 +89,8 @@ public class Player extends AbstractAppState implements PhysicsCollisionListener
 	speed = _speed;
 	defense = _defense;
 	strength = _strength;
+
+	bulletAppState.getPhysicsSpace().addCollisionListener(this);
     }
 
     public Vector3f getPosition() {
@@ -107,7 +112,7 @@ public class Player extends AbstractAppState implements PhysicsCollisionListener
 	if (client.getId() != clientId) {
 	    return;
 	}
-	
+
 	client.send(new UpdatePlayerLocationMessage(rb.getPhysicsLocation(), rb.getPhysicsRotation(), clientId));
 
 	inputDir.x = x;
@@ -127,6 +132,8 @@ public class Player extends AbstractAppState implements PhysicsCollisionListener
 	    rb.setLinearVelocity(rb.getLinearVelocity().multLocal(0.995f, 0.995f, 0.995f));
 	    rb.setAngularVelocity(rb.getAngularVelocity().multLocal(0.99f, 0.99f, 0.99f));
 	}
+	
+	System.out.println(rb.getMass());
     }
 
     public void Die() {
@@ -136,12 +143,16 @@ public class Player extends AbstractAppState implements PhysicsCollisionListener
 	    // Reset the player
 	    rb.setLinearVelocity(new Vector3f(0, -10, 0));
 	    rb.setPhysicsLocation(new Vector3f(0, 20, 0));
+	    rb.setMass(5);
+	    client.send(new UpdatePlayerMassMessage(5, client.getId()));
 	}
     }
 
-    public void TakeDamage(Player enemy) {
-	damagePercent += enemy.GetStrength();
-	rb.setMass(rb.getMass() / (enemy.GetStrength() * (15 - GetDefense())));
+    public void TakeDamage(float force) {
+	if (((15 - GetDefense()) * force * 0.0009f * rb.getMass()) > 1) {
+	    rb.setMass(rb.getMass() / ((15 - GetDefense()) * force * 0.0009f * rb.getMass()));
+	    client.send(new UpdatePlayerMassMessage(rb.getMass() / ((15 - GetDefense()) * force * 0.0009f * rb.getMass()), client.getId()));
+	}
     }
 
     public int GetStrength() {
@@ -268,6 +279,6 @@ public class Player extends AbstractAppState implements PhysicsCollisionListener
 
     @Override
     public void collision(PhysicsCollisionEvent event) {
-	
+	TakeDamage(event.getAppliedImpulse());
     }
 }
