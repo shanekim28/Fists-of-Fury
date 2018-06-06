@@ -10,7 +10,6 @@ import de.lessvoid.nifty.builder.LayerBuilder;
 import de.lessvoid.nifty.builder.PanelBuilder;
 import de.lessvoid.nifty.builder.ScreenBuilder;
 import de.lessvoid.nifty.builder.TextBuilder;
-import de.lessvoid.nifty.controls.TextField;
 import de.lessvoid.nifty.controls.button.builder.ButtonBuilder;
 import de.lessvoid.nifty.controls.label.builder.LabelBuilder;
 import de.lessvoid.nifty.screen.DefaultScreenController;
@@ -190,8 +189,6 @@ public class MenuScreen extends BaseAppState {
                                         valignCenter();
                                         height("50%");
                                         width("20%");
-										
-										nifty.getNifty().getCurrentScreen().findNiftyControl("address", TextField.class).getRealText();
 
                                         interactOnClick("startGame(hud)");
                                     }

@@ -70,9 +70,9 @@ public class ClientMain extends SimpleApplication implements ClientStateListener
 		niftySetUp();
     }
 	
-	public void JoinGame() {
+	public void JoinGame(String _address) {
 		try {
-            client = Network.connectToServer(address, NetworkUtility.port);
+            client = Network.connectToServer(_address, NetworkUtility.port);
             client.start();
         } catch (IOException e) {
             Logger.getLogger(ClientMain.class.getName()).log(Level.SEVERE, null, e);
@@ -91,7 +91,7 @@ public class ClientMain extends SimpleApplication implements ClientStateListener
     @Override
     public void simpleUpdate(float tpf) {
 		if (screen1.myStartScreen.runner) {
-			JoinGame();
+			JoinGame(screen1.myStartScreen.address);
 			screen1.myStartScreen.runner = false;
 		}
 		
