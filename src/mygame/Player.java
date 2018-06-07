@@ -102,6 +102,9 @@ public class Player extends AbstractAppState implements PhysicsCollisionListener
 		// TODO - Make this not stupid
 		// Restrict motion to the x and y axis
 		rb.setLinearVelocity(rb.getLinearVelocity().multLocal(1, 1, 0));
+		if (rb.getPhysicsLocation().z > 0.5f || rb.getPhysicsLocation().z < -0.5f) {
+			rb.setPhysicsLocation(rb.getPhysicsLocation().multLocal(1, 1, 0));
+		}
 
 		// Kill the player if it goes out of bounds
 		if ((rb.getPhysicsLocation().x > boundary || rb.getPhysicsLocation().y > boundary * 2 || rb.getPhysicsLocation().z > boundary) || (rb.getPhysicsLocation().x < -boundary || rb.getPhysicsLocation().y < -boundary || rb.getPhysicsLocation().z < -boundary)) {
