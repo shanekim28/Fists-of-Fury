@@ -51,6 +51,8 @@ public class ClientMain extends SimpleApplication implements ClientStateListener
         NetworkUtility.InitializeSerializables();
 
         app.setPauseOnLostFocus(false);
+		app.setDisplayFps(false);
+		app.setDisplayStatView(false);
     }
     
     public void niftySetUp() {
