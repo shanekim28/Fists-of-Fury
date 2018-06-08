@@ -48,7 +48,7 @@ public class Player extends AbstractAppState implements PhysicsCollisionListener
 	boolean charging = false;
 	boolean anchored = false;
 
-	int boundary = 30;
+	int boundary = 75;
 
 	public Geometry playerObject;
 

@@ -17,7 +17,7 @@ import com.jme3.network.serializing.Serializer;
  */
 public class NetworkUtility {
 
-    public static int port = 6000;
+    public static int port = 300;
 
     public static void InitializeSerializables() {
 	Serializer.setReadOnly(false);
