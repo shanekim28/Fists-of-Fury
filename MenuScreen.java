@@ -202,9 +202,6 @@ public class MenuScreen extends BaseAppState {
 								alignLeft();
 								height("15%");
 								width("90%");
-
-								// add control
-						
 							}
 						});
 					}
